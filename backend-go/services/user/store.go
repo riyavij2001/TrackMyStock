@@ -2,6 +2,7 @@ package user
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 
@@ -35,7 +36,7 @@ func (s *Store) GetUserByEmail(email string) (*types.User, error) {
 	}
 	if u.ID == 0 {
 		log.Println("Error:", "could not find the user")
-		return nil, err
+		return nil, errors.New("could not find the user")
 	}
 	log.Println("Success:", "found the user!")
 	return u, nil
