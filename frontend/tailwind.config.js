@@ -12,7 +12,24 @@ export default {
     extend: {},
   },
   darkMode: "class",
-  plugins: [heroui(), require('@tailwindcss/typography'),
+  plugins: [heroui({defaultTheme: "dark",
+    themes: {
+      light: {
+        colors: {
+          primary: {
+            DEFAULT: "#A05DD3"
+          }
+        }
+      },
+      dark: {
+        colors: {
+          primary: {
+            DEFAULT: "#A05DD3"
+          }
+        }
+      },
+    }
+  }), require('@tailwindcss/typography'),
   ]
 
 }
