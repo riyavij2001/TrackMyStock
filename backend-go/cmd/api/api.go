@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/riyavij2001/TrackMyStock/services/user"
+	userstocks "github.com/riyavij2001/TrackMyStock/services/user_stocks"
 )
 
 type APIServer struct {
@@ -48,6 +49,10 @@ func (s *APIServer) Run() error {
 	userStore := user.NewStore(s.db)
 	userHandler := user.NewHandler(userStore)
 	userHandler.RegisterRoutes(subRouter)
+
+	userStocksStore := userstocks.NewStore(s.db)
+	userStocksHandler := userstocks.NewHandler(userStocksStore)
+	userStocksHandler.RegisterRoutes(subRouter)
 
 	fmt.Println("Listening on ", s.addr)
 	return http.ListenAndServe(s.addr, router)

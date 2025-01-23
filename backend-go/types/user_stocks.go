@@ -8,6 +8,15 @@ type UserStocks struct {
 
 type UserStocksStore interface {
 	GetUserStocks(int) ([]Stocks, error)
-	AddUserStock(int, []int) error
+	AddUserStock(int, []string) error
 	RemoveUserStock(int, int) error
+}
+
+type UserStockDataPayload struct {
+	UserID int      `json:"user_id"`
+	Stocks []string `json:"stocks"`
+}
+
+type UserStocksPayload struct {
+	UserID int `json:"user_id"`
 }
