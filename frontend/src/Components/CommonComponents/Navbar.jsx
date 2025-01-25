@@ -18,8 +18,7 @@ const NavigationBar = () => {
   const menuItems = [
     "Home",
     "About Us",
-    "Stocks",
-    "Why Us",
+    "Search Stocks",
     "Subscribe",
   ];
 
@@ -49,12 +48,7 @@ const NavigationBar = () => {
         </NavbarItem>
         <NavbarItem>
           <Link className='text-white' href="#">
-            Stocks
-          </Link>
-        </NavbarItem>
-        <NavbarItem>
-          <Link className='text-white' href="#">
-            Why Us
+            Search Stocks
           </Link>
         </NavbarItem>
         <NavbarItem>

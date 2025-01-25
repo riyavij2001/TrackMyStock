@@ -3,16 +3,16 @@ import React from 'react'
 
 function LandingPage() {
   return (
-    <div className="sm:grid grid-cols-2 text-white p-8 mt-12 sm:mt-20 text-center">
+    <div className="sm:grid grid-cols-2 text-white p-8 mt-6 sm:mt-20 text-center">
       {/* Left Column (Content) */}
-      <div className="flex flex-col justify-center space-y-8 w-3/4 m-auto">
+      <div className="flex flex-col justify-center space-y-8 w-4/5 m-auto">
         <h1 className="text-3xl font-bold">
-          Track Your <span className='text-[#DC9EBF]'> Stocks </span> in Real-Time – Stay Ahead of the Market!
+        <span className='text-[#DC9EBF]'> Track Your Stocks </span> in Real-Time – Stay Ahead of the Market!
         </h1>
         <p className="text-lg">
           Instant insights and up-to-date stock details at your fingertips – no more guessing, just informed investing.
         </p>
-        <Button className='font-semibold text-black' color='primary'>Get Started</Button>
+        <Button  className="bg-[#4B2C46] bg-opacity-80  text-white py-3 px-6 rounded-lg text-xl font-semibold hover:bg-[#B77D9D] transition-all duration-300 transform hover:scale-105">Get Started</Button>
       </div>
 
 

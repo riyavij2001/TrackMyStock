@@ -1,6 +1,9 @@
 import './App.css'
+import AboutUs from './Components/AboutUs'
 import Navbar from './Components/CommonComponents/Navbar'
 import LandingPage from './Components/LandingPage'
+import Stocks from './Components/Stocks'
+import Subscribe from './Components/Subscribe'
 
 function App() {
 
@@ -12,6 +15,9 @@ function App() {
       }}> 
       <Navbar /> 
          <LandingPage />
+         <AboutUs />
+         <Stocks />
+         <Subscribe />
     </div>
     </>
   )
