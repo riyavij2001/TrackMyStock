@@ -47,8 +47,37 @@ func (s *Store) GetUserStocks(userID int) ([]types.Stocks, error) {
 	}
 	return finalStocks, nil
 }
-func (s *Store) AddUserStock(int, []string) error { return nil }
-func (s *Store) RemoveUserStock(int, int) error   { return nil }
+func (s *Store) AddUserStock(userID int, stockIDs []int) error {
+	query := `INSERT INTO user_stocks (user_id, stock_id) VALUES (?, ?)`
+
+	// Start a transaction to ensure atomicity
+	tx, err := s.db.Begin()
+	if err != nil {
+		log.Println("Error starting transaction:", err)
+		return err
+	}
+	defer tx.Rollback() // Rollback if there's an error
+
+	// Insert each stock association
+	for _, stockID := range stockIDs {
+		_, err := tx.Exec(query, userID, stockID)
+		if err != nil {
+			log.Println("Error inserting stock for user:", err)
+			return err // Exit immediately on error
+		}
+	}
+
+	// Commit the transaction after all insertions are successful
+	err = tx.Commit()
+	if err != nil {
+		log.Println("Error committing transaction:", err)
+		return err
+	}
+
+	return nil
+}
+
+func (s *Store) RemoveUserStock(int, int) error { return nil }
 
 func ScanRowIntoUserStocks(row *sql.Rows) (*types.UserStocks, error) {
 	stock := new(types.UserStocks)

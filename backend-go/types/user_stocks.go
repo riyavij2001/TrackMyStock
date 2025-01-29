@@ -8,7 +8,7 @@ type UserStocks struct {
 
 type UserStocksStore interface {
 	GetUserStocks(int) ([]Stocks, error)
-	AddUserStock(int, []string) error
+	AddUserStock(userID int, stockIDs []int) error
 	RemoveUserStock(int, int) error
 }
 

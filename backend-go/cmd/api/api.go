@@ -6,6 +6,8 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/riyavij2001/TrackMyStock/services/stock_details"
+	"github.com/riyavij2001/TrackMyStock/services/stocks"
 	"github.com/riyavij2001/TrackMyStock/services/user"
 	userstocks "github.com/riyavij2001/TrackMyStock/services/user_stocks"
 )
@@ -47,12 +49,18 @@ func (s *APIServer) Run() error {
 	subRouter := router.PathPrefix("/api/v1").Subrouter()
 
 	userStore := user.NewStore(s.db)
+	stockStore := stocks.NewStore(s.db)
+	stockDetailsStore := stock_details.NewStore(s.db)
+	userStocksStore := userstocks.NewStore(s.db)
+
 	userHandler := user.NewHandler(userStore)
 	userHandler.RegisterRoutes(subRouter)
 
-	userStocksStore := userstocks.NewStore(s.db)
-	userStocksHandler := userstocks.NewHandler(userStocksStore)
+	userStocksHandler := userstocks.NewHandler(userStocksStore, stockStore, stockDetailsStore, userStore)
 	userStocksHandler.RegisterRoutes(subRouter)
+
+	stocksHandler := stocks.NewHandler(stockStore)
+	stocksHandler.RegisterRoutes(subRouter)
 
 	fmt.Println("Listening on ", s.addr)
 	return http.ListenAndServe(s.addr, router)

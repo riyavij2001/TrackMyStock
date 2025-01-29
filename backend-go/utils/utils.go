@@ -31,8 +31,12 @@ func GetTokenFromRequest(r *http.Request) string {
 	tokenAuth := r.Header.Get("Authorization")
 	tokenQuery := r.URL.Query().Get("token")
 
+	// If token is in the Authorization header, it should start with "Bearer "
 	if tokenAuth != "" {
-		return tokenAuth
+		// Strip "Bearer " from the token
+		if len(tokenAuth) > 7 && tokenAuth[:7] == "Bearer " {
+			return tokenAuth[7:]
+		}
 	}
 
 	if tokenQuery != "" {
