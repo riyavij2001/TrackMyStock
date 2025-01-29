@@ -4,8 +4,10 @@ import (
 	"database/sql"
 	"log"
 
+	"github.com/riyavij2001/TrackMyStock/config"
 	"github.com/riyavij2001/TrackMyStock/services/stocks"
 	"github.com/riyavij2001/TrackMyStock/types"
+	"gopkg.in/gomail.v2"
 )
 
 type Store struct {
@@ -92,4 +94,25 @@ func ScanRowIntoUserStocks(row *sql.Rows) (*types.UserStocks, error) {
 	}
 	log.Println("Success:", "mapped the user stock")
 	return stock, nil
+}
+
+func (s *Store) SendSubMail(htmlContent string, recipientName string, recipientEmail string) error {
+	fromEmail := config.Envs.EmailUsername
+	password := config.Envs.EmailPassword
+
+	smtpServer := "smtp.gmail.com"
+	smtpPort := 587
+	message := gomail.NewMessage()
+	message.SetHeader("From", fromEmail)
+	message.SetHeader("To", recipientEmail)
+	message.SetHeader("Subject", recipientName+" Portfolio Status")
+	message.SetBody("text/html", htmlContent)
+
+	// Send the email using SMTP
+	dialer := gomail.NewDialer(smtpServer, smtpPort, fromEmail, password)
+	if err := dialer.DialAndSend(message); err != nil {
+		return err
+	}
+
+	return nil
 }

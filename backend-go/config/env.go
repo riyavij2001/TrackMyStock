@@ -18,6 +18,8 @@ type Config struct {
 	DBName                 string
 	JWTSecret              string
 	JWTExpirationInSeconds int64
+	EmailUsername          string
+	EmailPassword          string
 }
 
 var Envs = initConfig()
@@ -32,7 +34,10 @@ func initConfig() Config {
 		DBAddress:              fmt.Sprintf("%s:%s", getEnv("DB_HOST", "127.0.0.1"), getEnv("DB_PORT", "3306")),
 		DBName:                 getEnv("DB_NAME", "stocks"),
 		JWTSecret:              getEnv("JWT_SECRET", "not-so-secret-now-is-it?"),
-		JWTExpirationInSeconds: getEnvAsInt("JWT_EXPIRATION_IN_SECONDS", 3600*24*7)}
+		JWTExpirationInSeconds: getEnvAsInt("JWT_EXPIRATION_IN_SECONDS", 3600*24*7),
+		EmailUsername:          getEnv("EMAIL_USERNAME", ""),
+		EmailPassword:          getEnv("EMAIL_PASSWORD", ""),
+	}
 }
 
 func getEnv(key, fallback string) string {

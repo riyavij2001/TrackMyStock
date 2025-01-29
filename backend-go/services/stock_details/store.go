@@ -20,7 +20,7 @@ func NewStore(db *sql.DB) *Store {
 func (s *Store) GetStockDetailsAllDates(stockID int) ([]types.StockDetails, error) {
 	// Query to select all stock details for the given stock_id
 	query := `SELECT id, date, close, altman_z_score, f_score, sloan_ratio, stock_id 
-              FROM stock_details WHERE stock_id = ?`
+              FROM stock_details WHERE stock_id = ? ORDER BY date DESC LIMIT 2`
 
 	rows, err := s.db.Query(query, stockID)
 	if err != nil {

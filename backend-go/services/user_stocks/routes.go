@@ -201,6 +201,7 @@ func (h *UserStocksHandler) removeUserStock(w http.ResponseWriter, r *http.Reque
 }
 
 func (h *UserStocksHandler) getCategorizedStocksHandler(w http.ResponseWriter, r *http.Request) {
+
 	var requestBody struct {
 		Args []string `json:"args"`
 	}
@@ -216,6 +217,39 @@ func (h *UserStocksHandler) getCategorizedStocksHandler(w http.ResponseWriter, r
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
+	utils.WriteJSON(w, http.StatusCreated, stocksList)
+
+}
+
+func (h *UserStocksHandler) sendSubMail(w http.ResponseWriter, r *http.Request) {
+	userId := auth.GetUserIDFromContext(r.Context())
+
+	var requestBody struct {
+		Args []string `json:"args"`
+	}
+
+	if err := utils.ParseJSON(r, &requestBody); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	userDetails, err := h.userStore.GetUserById(userId)
+
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	stocksList, err := h.getCategorizedStocks(requestBody.Args)
+
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	htmlContent, _ := utils.RenderTemplate(stocksList, userDetails.FirstName)
+
+	h.store.SendSubMail(htmlContent, userDetails.FirstName, userDetails.Email)
 
 	utils.WriteJSON(w, http.StatusCreated, stocksList)
 
@@ -231,6 +265,12 @@ func (h *UserStocksHandler) getCategorizedStocks(args []string) (types.SectorSto
 			continue
 		}
 		stock_detail, err := h.stockdetailStore.GetStockDetailsAllDates(stock.ID)
+
+		/*
+			TODO: 1. Get Previous Week data if exists
+			TODO: 2. Get today data
+				TODO: 2.1 If not exists, fetch
+		*/
 
 		if err != nil {
 			log.Println("Could not find stock details for the arg:", arg, "id:", stock.ID)

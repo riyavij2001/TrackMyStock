@@ -10,6 +10,7 @@ type UserStocksStore interface {
 	GetUserStocks(int) ([]Stocks, error)
 	AddUserStock(userID int, stockIDs []int) error
 	RemoveUserStock(int, int) error
+	SendSubMail(htmlContent string, recipientName string, recipientEmail string) error
 }
 
 type UserStockDataPayload struct {
