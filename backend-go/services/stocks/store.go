@@ -135,7 +135,3 @@ func ScanRowIntoStock(row *sql.Rows) (*types.Stocks, error) {
 	log.Println("Success:", "mapped the stock")
 	return stock, nil
 }
-
-func (s *Store) GetCategorizedStocks(args []string) ([]types.CategorizedStocks, error) {
-	return nil, nil
-}

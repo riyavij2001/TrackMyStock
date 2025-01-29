@@ -30,6 +30,7 @@ func (h *UserStocksHandler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/addStock", auth.WithJWTAuth(h.addUserStock, h.userStore)).Methods("POST")
 	router.HandleFunc("/removeStock", auth.WithJWTAuth(h.removeUserStock, h.userStore)).Methods("DELETE")
 	router.HandleFunc("/getStock", auth.WithJWTAuth(h.getUserStocks, h.userStore)).Methods("GET")
+	router.HandleFunc("/getCategorizedStocks", auth.WithJWTAuth(h.getCategorizedStocksHandler, h.userStore)).Methods("POST")
 }
 
 func (h *UserStocksHandler) getUserStocks(w http.ResponseWriter, r *http.Request) {
@@ -196,4 +197,66 @@ func (h *UserStocksHandler) addUserStock(w http.ResponseWriter, r *http.Request)
 func (h *UserStocksHandler) removeUserStock(w http.ResponseWriter, r *http.Request) {
 
 	utils.WriteJSON(w, http.StatusCreated, map[string]string{"message": "User Created"})
+
+}
+
+func (h *UserStocksHandler) getCategorizedStocksHandler(w http.ResponseWriter, r *http.Request) {
+	var requestBody struct {
+		Args []string `json:"args"`
+	}
+
+	if err := utils.ParseJSON(r, &requestBody); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	stocksList, err := h.getCategorizedStocks(requestBody.Args)
+
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusCreated, stocksList)
+
+}
+
+func (h *UserStocksHandler) getCategorizedStocks(args []string) (types.SectorStocks, error) {
+	stocksList := types.SectorStocks{}
+
+	for _, arg := range args {
+		stock, err := h.stockStore.GetStockByArg(arg)
+		if err != nil || stock == nil {
+			log.Println("Could not find for the arg:", arg)
+			continue
+		}
+		stock_detail, err := h.stockdetailStore.GetStockDetailsAllDates(stock.ID)
+
+		if err != nil {
+			log.Println("Could not find stock details for the arg:", arg, "id:", stock.ID)
+			continue
+		}
+
+		sector := stock.Sector
+
+		for _, sd := range stock_detail {
+			fullDetail := turnStockIntoFullDetails(*stock, sd)
+			stocksList.Add(sector, fullDetail)
+		}
+
+	}
+	return stocksList, nil
+}
+
+func turnStockIntoFullDetails(stock types.Stocks, details types.StockDetails) types.StockFullDetails {
+	return types.StockFullDetails{
+		ID:     stock.ID,
+		Date:   details.Date,
+		Code:   stock.Code,
+		Close:  details.Close,
+		Sector: stock.Sector,
+		Altman: details.AltmanZScore,
+		Sloan:  details.SloanRatio,
+		FScore: details.FScore,
+	}
 }
