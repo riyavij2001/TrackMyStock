@@ -2,11 +2,11 @@ package config
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 
 	"github.com/joho/godotenv"
+	"github.com/riyavij2001/TrackMyStock/utils"
 )
 
 type Config struct {
@@ -42,10 +42,10 @@ func initConfig() Config {
 
 func getEnv(key, fallback string) string {
 	if value, ok := os.LookupEnv(key); ok {
-		log.Println("Found", key, ":", value)
+		utils.LogMessage(utils.INFO, "Found", key, ":", value)
 		return value
 	}
-	log.Println("Backup", key, ":", fallback)
+	utils.LogMessage(utils.INFO, "Backup", key, ":", fallback)
 	return fallback
 }
 

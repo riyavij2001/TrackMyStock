@@ -3,12 +3,19 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
 )
 
 var Validate = validator.New()
+
+const (
+	INFO    = "INFO"
+	WARNING = "WARNING"
+	ERROR   = "ERROR"
+)
 
 func ParseJSON(r *http.Request, payload any) error {
 	if r.Body == nil {
@@ -44,4 +51,9 @@ func GetTokenFromRequest(r *http.Request) string {
 	}
 
 	return ""
+}
+
+func LogMessage(level string, message ...any) {
+	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+	log.Printf("[%s] %s", level, message)
 }

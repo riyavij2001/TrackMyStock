@@ -29,7 +29,7 @@ func CreateJWT(secret []byte, userID int) (string, error) {
 
 	tokenString, err := token.SignedString(secret)
 	if err != nil {
-		log.Println("Could not sign JWT String")
+		utils.LogMessage(utils.ERROR, "Could not sign JWT String")
 		return "", err
 	}
 
@@ -39,7 +39,7 @@ func CreateJWT(secret []byte, userID int) (string, error) {
 func WithJWTAuth(handlerFunc http.HandlerFunc, store types.UserStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenString := utils.GetTokenFromRequest(r)
-		log.Println("Token: ", tokenString)
+		utils.LogMessage(utils.INFO, "Token: ", tokenString)
 
 		token, err := validateJWTToken(tokenString)
 		if err != nil {
@@ -49,7 +49,7 @@ func WithJWTAuth(handlerFunc http.HandlerFunc, store types.UserStore) http.Handl
 		}
 
 		if !token.Valid {
-			log.Println("invalid token")
+			utils.LogMessage(utils.ERROR, "invalid token")
 			permissionDenied(w)
 			return
 		}
@@ -99,7 +99,7 @@ func permissionDenied(w http.ResponseWriter) {
 
 func GetUserIDFromContext(ctx context.Context) int {
 	userID, ok := ctx.Value(UserKey).(int)
-	log.Println("userID: ", userID)
+	utils.LogMessage(utils.INFO, "userID: ", userID)
 	if !ok {
 		fmt.Errorf("could not find the user")
 		return -1

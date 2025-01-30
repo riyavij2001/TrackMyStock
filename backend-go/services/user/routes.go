@@ -2,7 +2,6 @@ package user
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -57,7 +56,7 @@ func (h *Handler) loginUser(w http.ResponseWriter, r *http.Request) {
 	secret := []byte(config.Envs.JWTSecret)
 	token, err := auth.CreateJWT(secret, u.ID)
 	if err != nil {
-		log.Println("Could not create token")
+		utils.LogMessage(utils.ERROR, "Could not create token")
 		utils.WriteError(w, http.StatusBadGateway, fmt.Errorf("not found, invalid email or password"))
 		return
 	}
@@ -90,7 +89,7 @@ func (h *Handler) registerUser(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		utils.WriteJSON(w, http.StatusBadGateway, err)
-		log.Println("Could not hash password")
+		utils.LogMessage(utils.ERROR, "Could not hash password")
 		return
 	}
 

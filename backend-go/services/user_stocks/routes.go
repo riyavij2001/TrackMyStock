@@ -2,7 +2,6 @@ package userstocks
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -69,7 +68,7 @@ func (h *UserStocksHandler) addUserStock(w http.ResponseWriter, r *http.Request)
 		stock, err := h.stockStore.GetStockByArg(a)
 		// The stock does not exist
 		if err != nil {
-			log.Println("could not get for arg: ", a)
+			utils.LogMessage(utils.ERROR, "could not get for arg: "+a)
 		} else {
 			if prevStocks == nil {
 				h.store.AddUserStock(userId, []int{stock.ID})
@@ -103,7 +102,7 @@ func (h *UserStocksHandler) addUserStock(w http.ResponseWriter, r *http.Request)
 			c.OnHTML("tr", func(e *colly.HTMLElement) {
 				// Get the cells in each row
 				cells := e.ChildTexts("td")
-				log.Println("Cells - Birds:", cells)
+				utils.LogMessage(utils.INFO, "Cells - Birds:"+strings.Join(cells, " "))
 
 				if len(cells) == 2 {
 					label := strings.TrimSpace(cells[0])
@@ -124,7 +123,7 @@ func (h *UserStocksHandler) addUserStock(w http.ResponseWriter, r *http.Request)
 			c.OnHTML("tr", func(e *colly.HTMLElement) {
 				// Get the cells in each row
 				cells := e.ChildTexts("td")
-				log.Println("Cells- Funda:", cells)
+				utils.LogMessage(utils.INFO, "Cells - Funda:"+strings.Join(cells, " "))
 
 				if len(cells) == 2 {
 					label := strings.TrimSpace(cells[0])
@@ -144,22 +143,22 @@ func (h *UserStocksHandler) addUserStock(w http.ResponseWriter, r *http.Request)
 			// Start the scraping process for both pages
 			err := c.Visit("https://www.topstockresearch.com/rt/Stock/" + a + "/BirdsEyeView")
 			if err != nil {
-				log.Println("Error visiting BirdsEyeView page for", a, ":", err)
+				utils.LogMessage(utils.ERROR, "Error visiting BirdsEyeView page for "+a+": "+err.Error())
 				continue
 			}
 
 			// Scrape fundamentals page
 			err = c.Visit("https://www.topstockresearch.com/rt/Stock/" + a + "/FundamentalAnalysis")
 			if err != nil {
-				log.Println("Error visiting Fundamental Analysis page for", a, ":", err)
+				utils.LogMessage(utils.ERROR, "Error visiting Fundamental Analysis page for "+a+": "+err.Error())
 			}
 
-			log.Println("arg:", a, "code:", code, "sector", sector, "altman:", altman, "sloan", sloanRatio, "fscore:", fScore)
+			utils.LogMessage(utils.ERROR, "arg:", a, "code:", code, "sector", sector, "altman:", altman, "sloan", sloanRatio, "fscore:", fScore)
 
 			// Store the stock and stock details
 			err = h.stockStore.AddStock(types.Stocks{Arg: a, Code: code, Sector: sector, PE_Ratio: 0.0})
 			if err != nil {
-				log.Println("Error adding stock to DB:", err)
+				utils.LogMessage(utils.ERROR, "Error adding stock to DB:", err)
 				continue
 			}
 			// Retrieve the stock after insertion
@@ -168,7 +167,7 @@ func (h *UserStocksHandler) addUserStock(w http.ResponseWriter, r *http.Request)
 			err = h.store.AddUserStock(userId, []int{stock.ID})
 
 			if err != nil {
-				log.Println("Error mapping stock to user:", err)
+				utils.LogMessage(utils.ERROR, "Error mapping stock to user:", err)
 				return
 			}
 
@@ -182,11 +181,11 @@ func (h *UserStocksHandler) addUserStock(w http.ResponseWriter, r *http.Request)
 				SloanRatio:   sloanRatio * 100,
 			})
 			if err != nil {
-				log.Println("Error adding stock details:", err)
+				utils.LogMessage(utils.ERROR, "Error adding stock details:"+err.Error())
 				continue
 			}
 
-			log.Println("Successfully added stock details for:", a)
+			utils.LogMessage(utils.INFO, "Successfully added stock details for:"+a)
 		}
 
 	}
@@ -261,7 +260,7 @@ func (h *UserStocksHandler) getCategorizedStocks(args []string) (types.SectorSto
 	for _, arg := range args {
 		stock, err := h.stockStore.GetStockByArg(arg)
 		if err != nil || stock == nil {
-			log.Println("Could not find for the arg:", arg)
+			utils.LogMessage(utils.ERROR, "Could not find for the arg:"+arg)
 			continue
 		}
 		stock_detail, err := h.stockdetailStore.GetStockDetailsAllDates(stock.ID)
@@ -273,7 +272,7 @@ func (h *UserStocksHandler) getCategorizedStocks(args []string) (types.SectorSto
 		*/
 
 		if err != nil {
-			log.Println("Could not find stock details for the arg:", arg, "id:", stock.ID)
+			utils.LogMessage(utils.ERROR, "Could not find stock details for the arg:"+arg+"id:"+string(stock.ID))
 			continue
 		}
 

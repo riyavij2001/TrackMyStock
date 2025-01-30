@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/riyavij2001/TrackMyStock/types"
+	"github.com/riyavij2001/TrackMyStock/utils"
 )
 
 type Store struct {
@@ -22,7 +22,7 @@ func (s *Store) GetUserByEmail(email string) (*types.User, error) {
 	rows, err := s.db.Query("SELECT * FROM users WHERE email = ?", email)
 
 	if err != nil {
-		log.Println("Error:", "db error: ", err)
+		utils.LogMessage(utils.ERROR, "Error:", "db error: ", err)
 		return nil, err
 	}
 
@@ -30,15 +30,15 @@ func (s *Store) GetUserByEmail(email string) (*types.User, error) {
 	for rows.Next() {
 		u, err = scanRowIntoUser(rows)
 		if err != nil {
-			log.Println("Error:", "could not scan into user")
+			utils.LogMessage(utils.ERROR, "Error:", "could not scan into user")
 			return nil, err
 		}
 	}
 	if u.ID == 0 {
-		log.Println("Error:", "could not find the user")
+		utils.LogMessage(utils.ERROR, "Error:", "could not find the user")
 		return nil, errors.New("could not find the user")
 	}
-	log.Println("Success:", "found the user!")
+	utils.LogMessage(utils.INFO, "Success:", "found the user!")
 	return u, nil
 }
 
@@ -53,10 +53,10 @@ func scanRowIntoUser(row *sql.Rows) (*types.User, error) {
 		&u.CreatedAt,
 	)
 	if err != nil {
-		log.Println("Error:", "could not scan into user")
+		utils.LogMessage(utils.ERROR, "Error:", "could not scan into user")
 		return nil, err
 	}
-	log.Println("Success:", "mapped the user")
+	utils.LogMessage(utils.INFO, "Success:", "mapped the user")
 	return u, nil
 }
 

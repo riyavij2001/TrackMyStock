@@ -8,6 +8,7 @@ import (
 	"github.com/riyavij2001/TrackMyStock/cmd/api"
 	"github.com/riyavij2001/TrackMyStock/config"
 	"github.com/riyavij2001/TrackMyStock/db"
+	"github.com/riyavij2001/TrackMyStock/utils"
 )
 
 func main() {
@@ -27,7 +28,7 @@ func main() {
 	checkAndInitDBStorage(db)
 	server := api.NewAPIServer(":8181", db)
 	if err := server.Run(); err != nil {
-		log.Println("Could not run the server")
+		utils.LogMessage(utils.ERROR, "Could not run the server")
 	}
 }
 
@@ -36,5 +37,5 @@ func checkAndInitDBStorage(db *sql.DB) {
 	if err != nil {
 		log.Fatal("Could not ping the DB")
 	}
-	log.Println("Connected to the DB")
+	utils.LogMessage(utils.INFO, "Connected to the DB")
 }

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"regexp"
 	"strings"
@@ -59,7 +58,7 @@ func fetchStockData(w http.ResponseWriter, r *http.Request) {
 
 	// Read the response body
 	body, err := io.ReadAll(resp.Body)
-	log.Println("BODY: ", body)
+	utils.LogMessage(utils.INFO, "BODY: ", body)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error reading response: %v", err), http.StatusInternalServerError)
 		return
@@ -76,11 +75,11 @@ func fetchStockData(w http.ResponseWriter, r *http.Request) {
 	// Filter out only stock data (no screener items)
 	var stocks []StockResponse
 	for _, item := range rawResponse {
-		log.Println("ITEM:", item["id"], "LABEL:", item["label"])
+		utils.LogMessage(utils.INFO, "ITEM:", item["id"], "LABEL:", item["label"])
 		// Check if "id" contains "/Stock/"
 		if id, exists := item["id"].(string); exists && containsStock(id) {
 			// Add "Stock ID" attribute
-			log.Println("Found Stock")
+			utils.LogMessage(utils.INFO, "Found Stock")
 			startIdx := strings.Index(id, "/Stock/") + len("/Stock/")
 			endIdx := strings.Index(id, "/BirdsEyeView")
 			stock := StockResponse{
@@ -107,7 +106,7 @@ func containsStock(id string) bool {
 	// Compile the regex to check for "/Stock/" in the string
 	re := regexp.MustCompile(`/Stock/`)
 
-	log.Println("isStock: ", re.MatchString(id))
+	utils.LogMessage(utils.INFO, "isStock: ", re.MatchString(id))
 
 	// Return true if the regex finds a match
 	return re.MatchString(id)

@@ -2,10 +2,10 @@ package stock_details
 
 import (
 	"database/sql"
-	"log"
 	"time"
 
 	"github.com/riyavij2001/TrackMyStock/types"
+	"github.com/riyavij2001/TrackMyStock/utils"
 )
 
 type Store struct {
@@ -24,7 +24,7 @@ func (s *Store) GetStockDetailsAllDates(stockID int) ([]types.StockDetails, erro
 
 	rows, err := s.db.Query(query, stockID)
 	if err != nil {
-		log.Println("Error querying stock details:", err)
+		utils.LogMessage(utils.ERROR, "Error querying stock details:", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -33,7 +33,7 @@ func (s *Store) GetStockDetailsAllDates(stockID int) ([]types.StockDetails, erro
 	for rows.Next() {
 		stockDetail, err := scanRowIntoStockDetail(rows)
 		if err != nil {
-			log.Println("Error scanning row:", err)
+			utils.LogMessage(utils.ERROR, "Error scanning row:", err)
 			continue // Skip this row and move to the next one
 		}
 		stockDetailsList = append(stockDetailsList, *stockDetail)
@@ -41,7 +41,7 @@ func (s *Store) GetStockDetailsAllDates(stockID int) ([]types.StockDetails, erro
 
 	// Handle the case where no records are found
 	if len(stockDetailsList) == 0 {
-		log.Println("No stock details found for stock_id:", stockID)
+		utils.LogMessage(utils.ERROR, "No stock details found for stock_id:", stockID)
 		return nil, sql.ErrNoRows
 	}
 
@@ -63,7 +63,7 @@ func (s *Store) AddStockDetails(stockDetail types.StockDetails) error {
 		stockDetail.StockID,
 	)
 	if err != nil {
-		log.Println("Error adding stock details:", err)
+		utils.LogMessage(utils.ERROR, "Error adding stock details:", err)
 		return err
 	}
 	return nil
@@ -87,7 +87,7 @@ func scanRowIntoStockDetail(row *sql.Rows) (*types.StockDetails, error) {
 		&stockDetail.StockID,
 	)
 	if err != nil {
-		log.Println("Error scanning row into StockDetails:", err)
+		utils.LogMessage(utils.ERROR, "Error scanning row into StockDetails:", err)
 		return nil, err
 	}
 
@@ -104,6 +104,6 @@ func scanRowIntoStockDetail(row *sql.Rows) (*types.StockDetails, error) {
 		stockDetail.SloanRatio = 0
 	}
 
-	log.Println("Successfully mapped stock detail")
+	utils.LogMessage(utils.INFO, "Successfully mapped stock detail")
 	return stockDetail, nil
 }

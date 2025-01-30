@@ -2,9 +2,9 @@ package stocks
 
 import (
 	"database/sql"
-	"log"
 
 	"github.com/riyavij2001/TrackMyStock/types"
+	"github.com/riyavij2001/TrackMyStock/utils"
 )
 
 type Store struct {
@@ -20,7 +20,7 @@ func (s *Store) GetStockByArg(arg string) (*types.Stocks, error) {
 	rows, err := s.db.Query(query, arg)
 
 	if err != nil {
-		log.Println("DB Error getting stock by arg:", err)
+		utils.LogMessage(utils.ERROR, "DB Error getting stock by arg:", err)
 		return nil, err
 	}
 	var stock *types.Stocks
@@ -28,7 +28,7 @@ func (s *Store) GetStockByArg(arg string) (*types.Stocks, error) {
 		stock, err = ScanRowIntoStock(rows)
 		if err != nil {
 			// Log the error and return it
-			log.Println("Error reading stock by arg:", err)
+			utils.LogMessage(utils.ERROR, "Error reading stock by arg:", err)
 			return nil, err
 		}
 
@@ -43,14 +43,14 @@ func (s *Store) GetStockById(id int) (*types.Stocks, error) {
 	rows, err := s.db.Query(query, id)
 
 	if err != nil {
-		log.Println("DB Error getting stock by id:", err)
+		utils.LogMessage(utils.ERROR, "DB Error getting stock by id:", err)
 		return nil, err
 	}
 
 	stock, err := ScanRowIntoStock(rows)
 	if err != nil {
 		// Log the error and return it
-		log.Println("Error getting stock by id:", err)
+		utils.LogMessage(utils.ERROR, "Error getting stock by id:", err)
 		return nil, err
 	}
 
@@ -74,7 +74,7 @@ func (s *Store) GetStockByIds(ids []int) ([]types.Stocks, error) {
 	rows, err := s.db.Query(query, placeholders...)
 	if err != nil {
 		// Log the error and return it
-		log.Println("Error querying stocks by ids:", err)
+		utils.LogMessage(utils.ERROR, "Error querying stocks by ids:", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -84,7 +84,7 @@ func (s *Store) GetStockByIds(ids []int) ([]types.Stocks, error) {
 		stock, err := ScanRowIntoStock(rows)
 		if err != nil {
 			// Log the error but continue scanning the next rows
-			log.Println("Error scanning stock row:", err)
+			utils.LogMessage(utils.ERROR, "Error scanning stock row:", err)
 			continue
 		}
 		stocks = append(stocks, *stock)
@@ -92,7 +92,7 @@ func (s *Store) GetStockByIds(ids []int) ([]types.Stocks, error) {
 
 	// Check if there were no rows found
 	if len(stocks) == 0 {
-		log.Println("No stocks found for the given ids")
+		utils.LogMessage(utils.ERROR, "No stocks found for the given ids")
 		return nil, sql.ErrNoRows
 	}
 
@@ -104,7 +104,7 @@ func (s *Store) AddStock(stock types.Stocks) error {
 	_, err := s.db.Exec(query, stock.Arg, stock.Sector, stock.Code, stock.PE_Ratio)
 	if err != nil {
 		// Log the error and return it
-		log.Println("Error adding stock:", err)
+		utils.LogMessage(utils.ERROR, "Error adding stock:", err)
 		return err
 	}
 	return nil
@@ -122,7 +122,7 @@ func ScanRowIntoStock(row *sql.Rows) (*types.Stocks, error) {
 		&peRatio,
 	)
 	if err != nil {
-		log.Println("Error:", "could not scan into stock")
+		utils.LogMessage(utils.ERROR, "Error:", "could not scan into stock")
 		return nil, err
 	}
 
@@ -132,6 +132,6 @@ func ScanRowIntoStock(row *sql.Rows) (*types.Stocks, error) {
 	} else {
 		stock.PE_Ratio = 0 // Or use a sentinel value or leave it as a zero value
 	}
-	log.Println("Success:", "mapped the stock")
+	utils.LogMessage(utils.INFO, "Success:", "mapped the stock")
 	return stock, nil
 }

@@ -2,11 +2,11 @@ package userstocks
 
 import (
 	"database/sql"
-	"log"
 
 	"github.com/riyavij2001/TrackMyStock/config"
 	"github.com/riyavij2001/TrackMyStock/services/stocks"
 	"github.com/riyavij2001/TrackMyStock/types"
+	"github.com/riyavij2001/TrackMyStock/utils"
 	"gopkg.in/gomail.v2"
 )
 
@@ -22,7 +22,7 @@ func (s *Store) GetUserStocks(userID int) ([]types.Stocks, error) {
 	rows, err := s.db.Query("SELECT * FROM user_stocks WHERE user_id = ?", userID)
 
 	if err != nil {
-		log.Println("Error:", "Could not find the stocks for the user")
+		utils.LogMessage(utils.ERROR, "Error:", "Could not find the stocks for the user")
 		return nil, err
 	}
 
@@ -31,7 +31,7 @@ func (s *Store) GetUserStocks(userID int) ([]types.Stocks, error) {
 	for rows.Next() {
 		us, err := ScanRowIntoUserStocks(rows)
 		if err != nil {
-			log.Println(err)
+			utils.LogMessage(utils.ERROR, err)
 			return nil, err
 		}
 		stcks, err := s.db.Query("SELECT * FROM stocks WHERE id = ?", us.StockID)
@@ -39,7 +39,7 @@ func (s *Store) GetUserStocks(userID int) ([]types.Stocks, error) {
 		for stcks.Next() {
 			s, err := stocks.ScanRowIntoStock(stcks)
 			if err != nil {
-				log.Println(err)
+				utils.LogMessage(utils.ERROR, err)
 				return nil, err
 			}
 
@@ -55,7 +55,7 @@ func (s *Store) AddUserStock(userID int, stockIDs []int) error {
 	// Start a transaction to ensure atomicity
 	tx, err := s.db.Begin()
 	if err != nil {
-		log.Println("Error starting transaction:", err)
+		utils.LogMessage(utils.ERROR, "Error starting transaction:", err)
 		return err
 	}
 	defer tx.Rollback() // Rollback if there's an error
@@ -64,7 +64,7 @@ func (s *Store) AddUserStock(userID int, stockIDs []int) error {
 	for _, stockID := range stockIDs {
 		_, err := tx.Exec(query, userID, stockID)
 		if err != nil {
-			log.Println("Error inserting stock for user:", err)
+			utils.LogMessage(utils.ERROR, "Error inserting stock for user:", err)
 			return err // Exit immediately on error
 		}
 	}
@@ -72,7 +72,7 @@ func (s *Store) AddUserStock(userID int, stockIDs []int) error {
 	// Commit the transaction after all insertions are successful
 	err = tx.Commit()
 	if err != nil {
-		log.Println("Error committing transaction:", err)
+		utils.LogMessage(utils.ERROR, "Error committing transaction:", err)
 		return err
 	}
 
@@ -89,10 +89,10 @@ func ScanRowIntoUserStocks(row *sql.Rows) (*types.UserStocks, error) {
 		&stock.StockID,
 	)
 	if err != nil {
-		log.Println("Error:", "could not scan into user stock")
+		utils.LogMessage(utils.ERROR, "Error:", "could not scan into user stock")
 		return nil, err
 	}
-	log.Println("Success:", "mapped the user stock")
+	utils.LogMessage(utils.INFO, "Success:", "mapped the user stock")
 	return stock, nil
 }
 
