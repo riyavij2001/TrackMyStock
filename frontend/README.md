@@ -1,8 +1,88 @@
-# React + Vite
+# TrackMyStocks
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+TrackMyStocks is a web application designed to track real-time stock prices and allow users to subscribe to daily email notifications for their selected stocks. This tool scrapes stock data, displays it according to user preferences, and offers an easy way to monitor your favorite stocks with daily updates sent directly to your inbox.
 
-Currently, two official plugins are available:
+## Features:
+- **Stock Data Scraping**: Fetches live stock data from multiple sources.
+- **User Preferences**: Displays stocks according to user-defined preferences.
+- **Email Notifications**: Users can subscribe for daily email updates about their selected stocks.
+- **Responsive UI**: Built with React and styled with Tailwind CSS to provide an elegant, mobile-friendly experience.
+  
+## Technologies Used:
+- **Backend**: Go (Golang), MongoDB
+- **Frontend**: React.js, Tailwind CSS
+- **Email Service**: [Specify email service API e.g., SendGrid, AWS SES]
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Setup Instructions
+
+### Prerequisites:
+- Go (Golang) installed on your machine: [Download Go](https://go.dev/dl/)
+- MongoDB instance running (locally or via a cloud service).
+- Node.js installed on your machine: [Download Node.js](https://nodejs.org/)
+
+### Backend Setup
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/riyavij2001/TrackMyStock.git
+   cd TrackMyStocks/backend
+   ```
+2. Install Go dependencies:
+    ```bash go mod tidy
+     ```
+
+3. Configure MongoDB:
+
+   - Set up your MongoDB connection in config/database.go.
+   - You can use a local MongoDB or connect to a cloud service (MongoDB Atlas, for example).
+   - Example connection URL:
+    ```bash
+    const dbURI = "mongodb://localhost:27017/trackmystocks" 
+    ```
+
+4. Start the backend server:
+
+    ```bash
+    go run main.go
+    ```
+
+
+### Frontend Setup
+
+1. Navigate to the frontend directory::
+   ```bash
+   cd ../frontend
+   ```
+2. Install npm dependencies:
+    ```bash 
+    npm install
+     ```
+
+3. Configure the frontend to interact with the backend (e.g., update API endpoint URLs in the frontend components).
+
+4. Start the frontend server::
+
+    ```bash
+    npm run dev
+    ```
+
+This will launch the Vite-powered React app on http://localhost:5173 (default Vite port).
+
+```bash 
+    This updated setup is now aligned with Vite, which uses `npm run dev` for development instead of `npm start`. Let me know if you need further adjustments!
+```
+
+### Running the Application
+
+Once both the backend and frontend are running, you can:
+- Visit http://localhost:3000 in your browser to view the app.
+- Log in (or sign up) to add and track your favorite stocks.
+-  Configure email preferences to receive daily stock updates.
+
+### Contributing
+
+- Fork this repository.
+- Create a new branch (git checkout -b feature-branch).
+- Make your changes and commit them (git commit -am 'Add new feature').
+- Push your branch (git push origin feature-branch).
+- Open a pull request to the main branch.
