@@ -68,7 +68,7 @@ func (h *UserStocksHandler) addUserStock(w http.ResponseWriter, r *http.Request)
 		stock, err := h.stockStore.GetStockByArg(a)
 		// The stock does not exist
 		if err != nil {
-			utils.LogMessage(utils.ERROR, "could not get for arg: "+a)
+			utils.LogMessage(utils.ERROR, "could not get for arg:", a)
 		} else {
 			if prevStocks == nil {
 				h.store.AddUserStock(userId, []int{stock.ID})
@@ -102,7 +102,7 @@ func (h *UserStocksHandler) addUserStock(w http.ResponseWriter, r *http.Request)
 			c.OnHTML("tr", func(e *colly.HTMLElement) {
 				// Get the cells in each row
 				cells := e.ChildTexts("td")
-				utils.LogMessage(utils.INFO, "Cells - Birds:"+strings.Join(cells, " "))
+				utils.LogMessage(utils.INFO, "Cells - Birds:", cells)
 
 				if len(cells) == 2 {
 					label := strings.TrimSpace(cells[0])
@@ -123,7 +123,7 @@ func (h *UserStocksHandler) addUserStock(w http.ResponseWriter, r *http.Request)
 			c.OnHTML("tr", func(e *colly.HTMLElement) {
 				// Get the cells in each row
 				cells := e.ChildTexts("td")
-				utils.LogMessage(utils.INFO, "Cells - Funda:"+strings.Join(cells, " "))
+				utils.LogMessage(utils.INFO, "Cells - Funda:", cells)
 
 				if len(cells) == 2 {
 					label := strings.TrimSpace(cells[0])
@@ -143,14 +143,14 @@ func (h *UserStocksHandler) addUserStock(w http.ResponseWriter, r *http.Request)
 			// Start the scraping process for both pages
 			err := c.Visit("https://www.topstockresearch.com/rt/Stock/" + a + "/BirdsEyeView")
 			if err != nil {
-				utils.LogMessage(utils.ERROR, "Error visiting BirdsEyeView page for "+a+": "+err.Error())
+				utils.LogMessage(utils.ERROR, "Error visiting BirdsEyeView page for", a, ":", err.Error())
 				continue
 			}
 
 			// Scrape fundamentals page
 			err = c.Visit("https://www.topstockresearch.com/rt/Stock/" + a + "/FundamentalAnalysis")
 			if err != nil {
-				utils.LogMessage(utils.ERROR, "Error visiting Fundamental Analysis page for "+a+": "+err.Error())
+				utils.LogMessage(utils.ERROR, "Error visiting Fundamental Analysis page for", a, ":", err.Error())
 			}
 
 			utils.LogMessage(utils.ERROR, "arg:", a, "code:", code, "sector", sector, "altman:", altman, "sloan", sloanRatio, "fscore:", fScore)
@@ -181,11 +181,11 @@ func (h *UserStocksHandler) addUserStock(w http.ResponseWriter, r *http.Request)
 				SloanRatio:   sloanRatio * 100,
 			})
 			if err != nil {
-				utils.LogMessage(utils.ERROR, "Error adding stock details:"+err.Error())
+				utils.LogMessage(utils.ERROR, "Error adding stock details:", err.Error())
 				continue
 			}
 
-			utils.LogMessage(utils.INFO, "Successfully added stock details for:"+a)
+			utils.LogMessage(utils.INFO, "Successfully added stock details for:", a)
 		}
 
 	}
@@ -260,7 +260,7 @@ func (h *UserStocksHandler) getCategorizedStocks(args []string) (types.SectorSto
 	for _, arg := range args {
 		stock, err := h.stockStore.GetStockByArg(arg)
 		if err != nil || stock == nil {
-			utils.LogMessage(utils.ERROR, "Could not find for the arg:"+arg)
+			utils.LogMessage(utils.ERROR, "Could not find for the arg:", arg)
 			continue
 		}
 		stock_detail, err := h.stockdetailStore.GetStockDetailsAllDates(stock.ID)
@@ -272,7 +272,7 @@ func (h *UserStocksHandler) getCategorizedStocks(args []string) (types.SectorSto
 		*/
 
 		if err != nil {
-			utils.LogMessage(utils.ERROR, "Could not find stock details for the arg:"+arg+"id:"+string(stock.ID))
+			utils.LogMessage(utils.ERROR, "Could not find stock details for the arg:", arg, "id:", string(stock.ID))
 			continue
 		}
 
