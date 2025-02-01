@@ -8,7 +8,10 @@ import App from './App.jsx'
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <HeroUIProvider>
+      <main className='dark'>
+
       <App />
+      </main>
     </HeroUIProvider>
   </StrictMode>,
 )
