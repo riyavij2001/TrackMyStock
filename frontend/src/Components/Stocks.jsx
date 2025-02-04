@@ -1,117 +1,53 @@
 import { Autocomplete, AutocompleteItem } from '@heroui/react';
-import React, { useState } from 'react';
-
-const stocks = [
-    { label: "TCS", key: "TCS", description: "Tata Consultancy Services" },
-    { label: "INFY", key: "INFY", description: "Infosys" },
-    { label: "RELIANCE", key: "RELIANCE", description: "Reliance Industries" },
-    { label: "HDFC", key: "HDFC", description: "HDFC Bank" },
-    { label: "ICICI", key: "ICICI", description: "ICICI Bank" },
-    { label: "SBIN", key: "SBIN", description: "State Bank of India" },
-    { label: "HCLTECH", key: "HCLTECH", description: "HCL Technologies" },
-];
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
 
 function Stocks() {
-    const [stockSymbol, setStockSymbol] = useState('');
-    const [stockData, setStockData] = useState(null);
-    const [error, setError] = useState(null);
-
-    const fetchStockData = async () => {
-        if (!stockSymbol) return;
-
-        const apiUrl = `https://api.example.com/stocks/${stockSymbol}`;
-
-        try {
-            const response = await fetch(apiUrl);
-            if (!response.ok) {
-                throw new Error('Stock not found');
-            }
-            const data = await response.json();
-            setStockData(data);
-            setError(null);
-        } catch (err) {
-
-            setError('Stock not found or invalid symbol');
-            setStockData({ label: "TCS", key: "TCS", description: "Tata Consultancy Services" });
+    const [searchResult, setSearchResult] = useState([]);
+    const [searchWord, setSearchWord] = useState("");
+    const getSearchResults = () => {
+        const config = {
+            method: 'get',
+            url: `http://localhost:8181/api/v1/fetchStockData?term=${searchWord}`,
+            headers: {
+                // Authorization: `Bearer ${DecryptValue(localStorage.getItem('token'))}`,
+                Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHBpcmVzQXQiOjE3MzkyOTA5MzIsInVzZXJJRCI6IjEifQ.0CMRDWeO_NYJuyh6OayrRZ5ZbB5mHZWuNmdA-tLjKc0`
+            },
         }
-    };
+        axios(config)
+            .then((res) => {
+                setSearchResult(res.data);
+            }).catch((err) => console.log(err))
+    }
 
-    const handleStockSelection = (value) => {
-        console.log("reached here", value)
-        setStockSymbol(value);
-        setStockData({ label: "TCS", key: "TCS", description: "Tata Consultancy Services" });
-        // fetchStockData();
-    };
-
+    useEffect(() => {
+        getSearchResults();
+    }, [searchWord])
 
     return (
-        <div className='min-h-screen py-12'>
-            {/* Stock Search Heading */}
+        <div className='min-h-screen py-16 sm:mt-16'>
+            {/* Search Stocks Heading */}
             <div className="text-center text-4xl font-bold text-white">
                 Search Stocks
             </div>
-            <div className="text-center mt-7 text-white">
-                Get Real-Time Information on Indian Stocks at Your Fingertips
-            </div>
 
-            {/* Stock Selection Dropdown */}
-            <div className="flex w-full flex-wrap md:flex-nowrap gap-4 justify-center mt-10">
-                <Autocomplete
-                    className="max-w-xs"
-                    label="Select a Stock"
-                    color='primary'
-                    variant='underlined'
-                    onSelectionChange={handleStockSelection}
-                >
-                    {stocks.map((stock) => (
-                        <AutocompleteItem key={stock.key    } >
-                            {stock.label}
-                        </AutocompleteItem>
+            {/* About Text Block */}
+            <div className="mt-8 px-6 text-xl text-gray-200 text-center max-w-4xl mx-auto">
+                Welcome to <span className="text-[#DC9EBF] font-bold">Track My Stocks</span> – your personalized,
+                real-time stock tracker designed to keep you informed and ahead of the curve. Whether you're a
+                seasoned investor, just starting your journey, or simply tracking your favorite companies,
+                we're here to make stock tracking easier, smarter, and more accessible.
+            </div>
+            <div className=' w-[35rem] text-center m-auto mt-20'>
+                <Autocomplete value={searchWord} onValueChange={setSearchWord} className="bg-[#4B2C46] bg-opacity-80  text-white py-3 px-6 rounded-lg text-xl font-semibold hover:bg-[#B77D9D] transition-all duration-300 transform hover:scale-105" label="Search for a Stock">
+                    {searchResult.map((res, i) => (
+                        <AutocompleteItem key={i}>{res.label}</AutocompleteItem>
                     ))}
                 </Autocomplete>
             </div>
-
-            {/* Error Handling */}
-            {error && <div className="text-red-500 text-center mt-6">{error}</div>}
-
-            {/* Display Stock Details */}
-            {stockData && (
-                // label: "TCS", key: "TCS", description: "Tata Consultancy Services"
-                <div className="mt-12 w-4/5 mx-auto bg-[#4B2C46] p-8 rounded-lg shadow-xl text-gray-200 bg-opacity-15">
-                    <h2 className="text-3xl font-semibold text-[#DC9EBF] mb-4">
-                        {stockData.label}
-                    </h2>
-                    <div className="flex justify-between items-center mb-6">
-                        <div className="text-2xl font-bold text-white">Price: ${stockData.price}</div>
-                        <div
-                            className={`text-lg font-semibold ${stockData.trend === 'up' ? 'text-green-500' : 'text-red-500'}`}
-                        >
-                            Trend: {stockData.trend === 'up' ? 'Up' : 'Down'}
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div className="bg-[#5C3D57] p-6 rounded-lg shadow-lg">
-                            <h4 className="text-xl font-semibold">Market Cap</h4>
-                            <p className="mt-2 text-lg">${stockData.marketCap}</p>
-                        </div>
-                        <div className="bg-[#5C3D57] p-6 rounded-lg shadow-lg">
-                            <h4 className="text-xl font-semibold">52-Week High</h4>
-                            <p className="mt-2 text-lg">${stockData.high52Weeks}</p>
-                        </div>
-                        <div className="bg-[#5C3D57] p-6 rounded-lg shadow-lg">
-                            <h4 className="text-xl font-semibold">52-Week Low</h4>
-                            <p className="mt-2 text-lg">${stockData.low52Weeks}</p>
-                        </div>
-                        <div className="bg-[#5C3D57] p-6 rounded-lg shadow-lg">
-                            <h4 className="text-xl font-semibold">Volume</h4>
-                            <p className="mt-2 text-lg">{stockData.volume}</p>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
-    );
+    )
 }
 
 export default Stocks;
