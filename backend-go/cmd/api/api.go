@@ -29,9 +29,9 @@ func CORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		// Common CORS headers
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173/")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept")
 
 		// If it's a preflight request, return a successful response.
 		if r.Method == http.MethodOptions {
@@ -63,5 +63,14 @@ func (s *APIServer) Run() error {
 	stocksHandler.RegisterRoutes(subRouter)
 
 	fmt.Println("Listening on ", s.addr)
+
+	// c := cors.New(cors.Options{
+	// 	AllowedOrigins:   []string{"http://localhost:5173"},
+	// 	AllowCredentials: true,
+	// 	// Enable Debugging for testing, consider disabling in production
+	// 	Debug: true,
+	// })
+
+	// handler := c.Handler(router)
 	return http.ListenAndServe(s.addr, router)
 }
