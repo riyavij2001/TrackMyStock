@@ -2,6 +2,8 @@ package userstocks
 
 import (
 	"database/sql"
+	"fmt"
+	"time"
 
 	"github.com/riyavij2001/TrackMyStock/config"
 	"github.com/riyavij2001/TrackMyStock/services/stocks"
@@ -83,15 +85,22 @@ func (s *Store) RemoveUserStock(int, int) error { return nil }
 
 func ScanRowIntoUserStocks(row *sql.Rows) (*types.UserStocks, error) {
 	stock := new(types.UserStocks)
+	var nextNotification sql.NullTime
 	err := row.Scan(
 		&stock.ID,
 		&stock.UserID,
 		&stock.StockID,
+		&nextNotification,
 	)
 	if err != nil {
 		utils.LogMessage(utils.ERROR, "Error:", "could not scan into user stock")
 		return nil, err
 	}
+
+	if nextNotification.Valid {
+		stock.NextNotification = nextNotification.Time
+	}
+
 	utils.LogMessage(utils.INFO, "Success:", "mapped the user stock")
 	return stock, nil
 }
@@ -114,5 +123,29 @@ func (s *Store) SendSubMail(htmlContent string, recipientName string, recipientE
 		return err
 	}
 
+	return nil
+}
+
+func (s *Store) SetNextNotification(userID int, stockID int, nextNotification time.Time) error {
+	query := `UPDATE user_stocks SET next_notification = ? WHERE user_id = ? AND stock_id = ?`
+
+	result, err := s.db.Exec(query, nextNotification, userID, stockID)
+	if err != nil {
+		utils.LogMessage(utils.ERROR, "Error updating next notification:", err)
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		utils.LogMessage(utils.ERROR, "Error getting rows affected:", err)
+		return err
+	}
+
+	if rowsAffected == 0 {
+		utils.LogMessage(utils.ERROR, "No matching user_stock record found")
+		return fmt.Errorf("no matching user_stock record found")
+	}
+
+	utils.LogMessage(utils.INFO, "Successfully updated next notification")
 	return nil
 }

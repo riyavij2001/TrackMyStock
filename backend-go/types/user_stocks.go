@@ -1,9 +1,12 @@
 package types
 
+import "time"
+
 type UserStocks struct {
-	ID      int `json:"id"`
-	UserID  int `json:"user_id"`
-	StockID int `json:"stock_id"`
+	ID               int       `json:"id"`
+	UserID           int       `json:"user_id"`
+	StockID          int       `json:"stock_id"`
+	NextNotification time.Time `json:"next_notification,omitempty"`
 }
 
 type UserStocksStore interface {
@@ -11,6 +14,7 @@ type UserStocksStore interface {
 	AddUserStock(userID int, stockIDs []int) error
 	RemoveUserStock(int, int) error
 	SendSubMail(htmlContent string, recipientName string, recipientEmail string) error
+	SetNextNotification(userID int, stockID int, nextNotification time.Time) error
 }
 
 type UserStockDataPayload struct {

@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/riyavij2001/TrackMyStock/services/reference"
 	"github.com/riyavij2001/TrackMyStock/services/stock_details"
 	"github.com/riyavij2001/TrackMyStock/services/stocks"
 	"github.com/riyavij2001/TrackMyStock/services/user"
@@ -52,6 +53,7 @@ func (s *APIServer) Run() error {
 	stockStore := stocks.NewStore(s.db)
 	stockDetailsStore := stock_details.NewStore(s.db)
 	userStocksStore := userstocks.NewStore(s.db)
+	referenceStore := reference.NewStore(s.db)
 
 	userHandler := user.NewHandler(userStore)
 	userHandler.RegisterRoutes(subRouter)
@@ -61,6 +63,9 @@ func (s *APIServer) Run() error {
 
 	stocksHandler := stocks.NewHandler(stockStore)
 	stocksHandler.RegisterRoutes(subRouter)
+
+	referenceHandler := reference.NewHandler(referenceStore)
+	referenceHandler.RegisterRoutes(subRouter)
 
 	fmt.Println("Listening on ", s.addr)
 

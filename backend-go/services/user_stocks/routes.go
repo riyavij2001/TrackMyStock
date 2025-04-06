@@ -30,6 +30,7 @@ func (h *UserStocksHandler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/removeStock", auth.WithJWTAuth(h.removeUserStock, h.userStore)).Methods("DELETE")
 	router.HandleFunc("/getStock", auth.WithJWTAuth(h.getUserStocks, h.userStore)).Methods("GET")
 	router.HandleFunc("/getCategorizedStocks", auth.WithJWTAuth(h.getCategorizedStocksHandler, h.userStore)).Methods("POST")
+	router.HandleFunc("/setNextNotification", auth.WithJWTAuth(h.setNextNotification, h.userStore)).Methods("POST")
 }
 
 func (h *UserStocksHandler) getUserStocks(w http.ResponseWriter, r *http.Request) {
@@ -298,4 +299,47 @@ func turnStockIntoFullDetails(stock types.Stocks, details types.StockDetails) ty
 		Sloan:  details.SloanRatio,
 		FScore: details.FScore,
 	}
+}
+
+func (h *UserStocksHandler) setNextNotification(w http.ResponseWriter, r *http.Request) {
+	userId := auth.GetUserIDFromContext(r.Context())
+
+	var requestBody struct {
+		StockID          int       `json:"stock_id"`
+		NextNotification time.Time `json:"next_notification"`
+	}
+
+	if err := utils.ParseJSON(r, &requestBody); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	// Validate that the stock belongs to the user
+	stocks, err := h.store.GetUserStocks(userId)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("could not find the user stocks: %v", err))
+		return
+	}
+
+	stockFound := false
+	for _, stock := range stocks {
+		if stock.ID == requestBody.StockID {
+			stockFound = true
+			break
+		}
+	}
+
+	if !stockFound {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("stock with ID %d does not belong to user", requestBody.StockID))
+		return
+	}
+
+	// Update the next notification date
+	err = h.store.SetNextNotification(userId, requestBody.StockID, requestBody.NextNotification)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("failed to set next notification: %v", err))
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, map[string]string{"message": "Next notification date set successfully"})
 }
