@@ -2,7 +2,7 @@ import React from 'react'
 
 function AboutUs() {
     return (
-        <div className='min-h-screen py-16 sm:mt-16'>
+        <div className='min-h-screen py-16 sm:mt-16' id='aboutUs'>
             {/* About Us Heading */}
             <div className="text-center text-4xl font-bold text-white">
                 About Us

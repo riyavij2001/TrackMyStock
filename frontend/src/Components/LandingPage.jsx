@@ -3,7 +3,7 @@ import React from 'react'
 
 function LandingPage() {
   return (
-    <div className="sm:grid grid-cols-2 text-white p-8 mt-6 sm:mt-20 text-center">
+    <div className="sm:grid grid-cols-2 text-white p-8 mt-6 sm:mt-20 text-center" id='home'>
       {/* Left Column (Content) */}
       <div className="flex flex-col justify-center space-y-8 w-4/5 m-auto">
         <h1 className="text-3xl font-bold">

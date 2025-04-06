@@ -15,33 +15,43 @@ import { GraphBarIncreaseSolid } from '../Icons/GraphIcon';
 const NavigationBar = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
-  const menuItems = [
-    "Home",
-    "About Us",
-    "Search Stocks",
-    "Subscribe",
+  const menuItems = [ { name: 'About Us', link: "#aboutUs" }, { name: 'Subscribe', link: "#subscribe" }, { name: 'Search Stocks', link: "#stocks" }, { name: 'Contact Us', link: "#contact" }
   ];
 
+  const handleScrollToSection = (sectionId) => {
+    const section = document.querySelector(sectionId);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      handleCloseNavMenu();
+    }
+  };
   return (
-    <Navbar onMenuOpenChange={setIsMenuOpen} style={{backgroundColor: 'rgba(15, 3, 23'}}>
+    <Navbar onMenuOpenChange={setIsMenuOpen} style={{ backgroundColor: 'rgba(15, 3, 23' }}>
       <NavbarContent>
         <NavbarMenuToggle
           aria-label={isMenuOpen ? "Close menu" : "Open menu"}
           className="sm:hidden text-white"
         />
         <NavbarBrand>
-         <GraphBarIncreaseSolid color="white" />
+          <GraphBarIncreaseSolid color="white" />
           <p className="font-bold text-inherit text-white ml-2">Track My Stocks</p>
         </NavbarBrand>
       </NavbarContent>
 
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
         <NavbarItem>
-          <Link className='text-white' href="#">
+          <Link className='text-white' href={"/"}>
             Home
           </Link>
         </NavbarItem>
-        <NavbarItem isActive>
+        {menuItems.map((page) => (
+        <NavbarItem>
+          <Link className='text-white' href={page.link}>
+            {page.name}
+          </Link>
+        </NavbarItem>
+        ))}
+        {/* <NavbarItem isActive>
           <Link className='text-white' aria-current="page" href="#">
             About Us
           </Link>
@@ -55,14 +65,14 @@ const NavigationBar = () => {
           <Link className='text-white' href="#">
             Subscribe
           </Link>
-        </NavbarItem>
+        </NavbarItem> */}
       </NavbarContent>
       <NavbarContent justify="end">
         {/* <NavbarItem className="hidden lg:flex">
           <Link href="#">Login</Link>
         </NavbarItem> */}
         <NavbarItem>
-          <Button as={Link} className='bg-[#A05DD3] text-black font-semibold' href="#" variant="flat">
+          <Button as={Link} className='bg-[#A05DD3] text-black font-semibold' href="/login" variant="flat">
             Login
           </Button>
         </NavbarItem>
