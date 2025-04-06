@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS reference (
+	`id` INT NOT NULL AUTO_INCREMENT,
+	`display_val` VARCHAR(255),
+	`value` INT DEFAULT NULL,
+	PRIMARY KEY (`id`)
+);
