@@ -9,7 +9,6 @@ import NavigationBar from './CommonComponents/Navbar'
 function Home() {
     return (
         <div>
-            <NavigationBar />
             <LandingPage />
             <AboutUs />
             <Subscribe />

@@ -76,6 +76,11 @@ const NavigationBar = () => {
             Login
           </Button>
         </NavbarItem>
+        <NavbarItem>
+          <Button as={Link} className='bg-[#A05DD3] text-black font-semibold' href="/signup" variant="flat">
+            SignUp
+          </Button>
+        </NavbarItem>
       </NavbarContent>
       <NavbarMenu>
         {menuItems.map((item, index) => (
