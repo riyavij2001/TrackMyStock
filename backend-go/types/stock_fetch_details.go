@@ -7,7 +7,7 @@ type StockFetchDetails struct {
 	AltmanZScore float64 `json:"altman_z_score"`
 	FScore       int     `json:"f_score"`
 	SloanRatio   float64 `json:"sloan_ratio"`
-	Change       float64 `json:"change"`
+	Change       string  `json:"change"`
 	Industry     string  `json:"industry"`
 	Sector       string  `json:"sector"`
 	PERatio      float64 `json:"pe_ratio"`

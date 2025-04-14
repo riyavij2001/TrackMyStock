@@ -140,8 +140,8 @@ func scrapStockDetails(id string) (types.StockFetchDetails, error) {
 	c := colly.NewCollector()
 
 	// Variables to store scraped data
-	var sector, code, industry string
-	var close, altman, fScore, sloanRatio, change, pe, roe float64
+	var sector, code, industry, change string
+	var close, altman, fScore, sloanRatio, pe, roe float64
 
 	// Scrape Birds Eye View
 	c.OnHTML("tr", func(e *colly.HTMLElement) {
@@ -163,7 +163,7 @@ func scrapStockDetails(id string) (types.StockFetchDetails, error) {
 			} else if strings.HasPrefix(label, "Indus") {
 				industry = value
 			} else if strings.HasPrefix(label, "Change") {
-				change, _ = strconv.ParseFloat(value, 64)
+				change = value
 			}
 		}
 	})

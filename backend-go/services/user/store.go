@@ -44,6 +44,8 @@ func (s *Store) GetUserByEmail(email string) (*types.User, error) {
 
 func scanRowIntoUser(row *sql.Rows) (*types.User, error) {
 	u := new(types.User)
+	var notificationFrequency sql.NullInt32
+
 	err := row.Scan(
 		&u.ID,
 		&u.FirstName,
@@ -51,11 +53,20 @@ func scanRowIntoUser(row *sql.Rows) (*types.User, error) {
 		&u.Email,
 		&u.Password,
 		&u.CreatedAt,
+		&notificationFrequency,
 	)
 	if err != nil {
 		utils.LogMessage(utils.ERROR, "Error:", "could not scan into user")
 		return nil, err
 	}
+
+	// Handle nullable notification_frequency
+	if notificationFrequency.Valid {
+		u.NotificationFrequency = int(notificationFrequency.Int32)
+	} else {
+		u.NotificationFrequency = 0
+	}
+
 	utils.LogMessage(utils.INFO, "Success:", "mapped the user")
 	return u, nil
 }
