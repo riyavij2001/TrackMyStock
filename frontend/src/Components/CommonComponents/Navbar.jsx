@@ -1,4 +1,6 @@
 import React from 'react'
+import { useSelector, useDispatch } from 'react-redux';
+import { logout } from '../../redux/slices/authSlice';
 import {
   Navbar,
   NavbarBrand,
@@ -14,17 +16,24 @@ import { GraphBarIncreaseSolid } from '../Icons/GraphIcon';
 
 const NavigationBar = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const dispatch = useDispatch();
 
-  const menuItems = [ { name: 'About Us', link: "#aboutUs" }, { name: 'Subscribe', link: "#subscribe" }, { name: 'Search Stocks', link: "#stocks" }, { name: 'Contact Us', link: "#contact" }
+  const menuItems = [{ name: 'About Us', link: "#aboutUs" }, { name: 'Subscribe', link: "#subscribe" }, { name: 'Search Stocks', link: "#stocks" }, { name: 'Contact Us', link: "#footer" }
   ];
 
   const handleScrollToSection = (sectionId) => {
     const section = document.querySelector(sectionId);
     if (section) {
       section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      handleCloseNavMenu();
+      setIsMenuOpen(false); // Close the menu after scrolling
     }
   };
+
+  const handleLogout = () => {
+    dispatch(logout());
+  };
+
   return (
     <Navbar onMenuOpenChange={setIsMenuOpen} style={{ backgroundColor: 'rgba(15, 3, 23' }}>
       <NavbarContent>
@@ -45,58 +54,56 @@ const NavigationBar = () => {
           </Link>
         </NavbarItem>
         {menuItems.map((page) => (
-        <NavbarItem>
-          <Link className='text-white' href={page.link}>
-            {page.name}
-          </Link>
-        </NavbarItem>
+          <NavbarItem>
+            <Link className='text-white' href={page.link}>
+              {page.name}
+            </Link>
+          </NavbarItem>
         ))}
-        {/* <NavbarItem isActive>
-          <Link className='text-white' aria-current="page" href="#">
-            About Us
-          </Link>
-        </NavbarItem>
-        <NavbarItem>
-          <Link className='text-white' href="#">
-            Search Stocks
-          </Link>
-        </NavbarItem>
-        <NavbarItem>
-          <Link className='text-white' href="#">
-            Subscribe
-          </Link>
-        </NavbarItem> */}
       </NavbarContent>
       <NavbarContent justify="end">
-        {/* <NavbarItem className="hidden lg:flex">
-          <Link href="#">Login</Link>
-        </NavbarItem> */}
-        <NavbarItem>
-          <Button as={Link} className='bg-[#A05DD3] text-black font-semibold' href="/login" variant="flat">
-            Login
-          </Button>
-        </NavbarItem>
-        <NavbarItem>
-          <Button as={Link} className='bg-[#A05DD3] text-black font-semibold' href="/signup" variant="flat">
-            SignUp
-          </Button>
-        </NavbarItem>
+        {isAuthenticated ? (
+          <NavbarItem>
+            <Button
+              className="bg-[#A05DD3] text-black font-semibold"
+              onPress={handleLogout}
+              variant="flat"
+            >
+              Logout
+            </Button>
+          </NavbarItem>
+        ) : (
+          <>
+            <NavbarItem>
+              <Button as={Link} className="bg-[#A05DD3] text-black font-semibold" href="/login" variant="flat">
+                Login
+              </Button>
+            </NavbarItem>
+            <NavbarItem>
+              <Button as={Link} className="bg-[#A05DD3] text-black font-semibold" href="/signup" variant="flat">
+                SignUp
+              </Button>
+            </NavbarItem>
+          </>
+        )}
       </NavbarContent>
       <NavbarMenu>
         {menuItems.map((item, index) => (
-          <NavbarMenuItem key={`${item}-${index}`}>
+          <NavbarMenuItem key={`${item.name}-${index}`}>
             <Link
               className="w-full"
               color={
-                index === 2 ? "primary" : index === menuItems.length - 1 ? "danger" : "foreground"
+                "primary"
               }
-              href="#"
+              href={item.link}
+              onClick={() => handleScrollToSection(item.link)} // Added scroll handler
               size="lg"
             >
-              {item}
+              {item.name}
             </Link>
           </NavbarMenuItem>
         ))}
+
       </NavbarMenu>
     </Navbar>
   );

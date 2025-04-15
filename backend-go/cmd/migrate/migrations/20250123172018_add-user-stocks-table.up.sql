@@ -5,5 +5,5 @@ CREATE TABLE IF NOT EXISTS user_stocks (
 	`next_notification` TIMESTAMP DEFAULT NULL,
 	PRIMARY KEY (`id`) USING BTREE,
 	FOREIGN KEY (`user_id`) REFERENCES users(`id`),
-	FOREIGN KEY (`stock_id`) REFERENCES stocks(`id`);
+	FOREIGN KEY (`stock_id`) REFERENCES stocks(`id`)
 );
