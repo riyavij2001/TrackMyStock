@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Button, Input } from "@heroui/react";
+import { Input } from "@heroui/react";
 import axios from "axios";
 
 function SignUp() {
@@ -30,19 +30,14 @@ function SignUp() {
     const config = {
       method: "post",
       url: `http://localhost:8181/api/v1/register`,
-      data: {
-        firstName,
-        lastName,
-        email,
-        password,
-      },
+      data: { firstName, lastName, email, password },
       withCredentials: true,
     };
 
     axios(config)
       .then((res) => {
         setToken(res.data.token);
-        setError(""); // clear any previous error
+        setError("");
         console.log("Token received:", res.data.token);
       })
       .catch((err) => {
@@ -55,66 +50,98 @@ function SignUp() {
   };
 
   return (
-    <div id="signup" className="h-[90vh] justify-items-center pt-[0.5rem]">
-      <div className="bg-black w-[70vh] justify-items-center h-[fit-content] content-center p-8 rounded-md">
-        <h2 className="text-white text-xl mb-6">Sign Up</h2>
-        <Input
-          isRequired
-          className="max-w-xs p-2 mb-4"
-          placeholder="Enter your first name"
-          label="First Name"
-          type="text"
-          ref={firstNameRef}
-        />
-        <Input
-          isRequired
-          className="max-w-xs p-2 mb-4"
-          placeholder="Enter your last name"
-          label="Last Name"
-          type="text"
-          ref={lastNameRef}
-        />
-        <Input
-          isRequired
-          className="max-w-xs p-2 mb-4"
-          placeholder="Enter your email address"
-          label="Email"
-          type="email"
-          ref={emailRef}
-        />
-        <Input
-          isRequired
-          className="max-w-xs p-2 mb-4"
-          placeholder="Enter your password"
-          label="Password"
-          type="password"
-          ref={passwordRef}
-        />
-        <Input
-          isRequired
-          className="max-w-xs p-2 mb-4"
-          placeholder="Confirm your password"
-          label="Confirm Password"
-          type="password"
-          ref={confirmPasswordRef}
-        />
+    <div id="signup" className="min-h-screen flex items-center justify-center text-gray-300">
+      <div className="w-full max-w-md bg-[#2F2F2F] p-8 rounded-lg shadow-lg">
+        <h2 className="text-3xl font-bold text-center text-[#a8d603] mb-6">Sign Up</h2>
+
         {passwordError && (
-          <p className="text-red-500 text-sm mt-1">{passwordError}</p>
+          <p className="text-red-500 text-sm mb-2">{passwordError}</p>
         )}
 
-        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+        {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
 
-        <div className="text-center mt-8">
+        <form className="space-y-5">
+          <div>
+            <label htmlFor="firstName" className="block text-sm font-medium mb-2">
+              First Name
+            </label>
+            <Input
+              isRequired
+              id="firstName"
+              placeholder="Enter your first name"
+              type="text"
+              ref={firstNameRef}
+              className="w-full p-3 rounded-lg bg-[#3A3A3A] text-white focus:outline-none focus:ring-2 focus:ring-[#a8d603]"
+            />
+          </div>
+          <div>
+            <label htmlFor="lastName" className="block text-sm font-medium mb-2">
+              Last Name
+            </label>
+            <Input
+              isRequired
+              id="lastName"
+              placeholder="Enter your last name"
+              type="text"
+              ref={lastNameRef}
+              className="w-full p-3 rounded-lg bg-[#3A3A3A] text-white focus:outline-none focus:ring-2 focus:ring-[#a8d603]"
+            />
+          </div>
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium mb-2">
+              Email
+            </label>
+            <Input
+              isRequired
+              id="email"
+              placeholder="Enter your email address"
+              type="email"
+              ref={emailRef}
+              className="w-full p-3 rounded-lg bg-[#3A3A3A] text-white focus:outline-none focus:ring-2 focus:ring-[#a8d603]"
+            />
+          </div>
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium mb-2">
+              Password
+            </label>
+            <Input
+              isRequired
+              id="password"
+              placeholder="Enter your password"
+              type="password"
+              ref={passwordRef}
+              className="w-full p-3 rounded-lg bg-[#3A3A3A] text-white focus:outline-none focus:ring-2 focus:ring-[#a8d603]"
+            />
+          </div>
+          <div>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium mb-2">
+              Confirm Password
+            </label>
+            <Input
+              isRequired
+              id="confirmPassword"
+              placeholder="Confirm your password"
+              type="password"
+              ref={confirmPasswordRef}
+              className="w-full p-3 rounded-lg bg-[#3A3A3A] text-white focus:outline-none focus:ring-2 focus:ring-[#a8d603]"
+            />
+          </div>
+
           <button
+            type="button"
             onClick={handleSignUp}
-            className="bg-[#4B2C46] bg-opacity-80 text-white py-3 px-5 rounded-md text-sm font-semibold hover:bg-[#B77D9D] transition-all duration-300 transform hover:scale-105"
+            className="w-full bg-[#a8d603] text-black font-semibold py-3 rounded-lg hover:bg-[#94c102] transition-all"
           >
             Sign Up
           </button>
-        </div>
-        <div className=" mt-5">
-          <a href="/login">Already have an account? Login here</a>
-        </div>
+        </form>
+
+        <p className="text-sm text-center mt-6">
+          Already have an account?{" "}
+          <a href="/login" className="text-[#a8d603] hover:underline">
+            Login here
+          </a>
+        </p>
       </div>
     </div>
   );

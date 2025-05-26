@@ -46,23 +46,25 @@ function Subscribe() {
     };
 
     return (
-        <div className="py-16" id="subscribe">
-            <div className="text-center text-4xl font-bold text-white">
+        <div className="py-16 text-gray-300 min-h-screen" id="subscribe">
+            {/* Heading */}
+            <div className="text-center text-4xl font-bold text-[#a8d603]">
                 Stay Updated with Real-Time Stock Alerts
             </div>
 
-            <div className="mt-8 px-6 text-xl text-gray-200 text-center max-w-4xl mx-auto">
+            {/* Description */}
+            <div className="mt-8 px-6 text-lg text-gray-400 text-center max-w-4xl mx-auto">
                 Subscribe to receive daily email notifications about your selected stock's performance.
                 Get the latest updates, market trends, and crucial movements delivered straight to your inbox,
                 so you never miss an important change. Stay ahead in the market with timely insights tailored to your stock preferences.
             </div>
 
             {/* Search stocks to subscribe Section */}
-            <div className="w-[35rem] text-center m-auto mt-20">
+            <div className="w-full sm:w-[35rem] text-center m-auto mt-20">
                 <Autocomplete
                     value={searchWord}
                     onValueChange={setSearchWord}
-                    className="bg-[#4B2C46] bg-opacity-80 text-white py-3 px-6 rounded-lg text-xl font-semibold hover:bg-[#B77D9D] transition-all duration-300 transform hover:scale-105"
+                    className="bg-[#2F2F2F] text-white py-3 px-6 rounded-lg text-lg font-semibold hover:bg-[#3A3A3A] transition-all duration-300"
                     label="Search for a Stock"
                 >
                     {searchResult.length > 0 ? (
@@ -70,7 +72,7 @@ function Subscribe() {
                             <AutocompleteItem
                                 key={i}
                                 onClick={() => handleTagSelection(res.label)}
-                                className="py-2 px-4 hover:bg-[#B77D9D] rounded-lg cursor-pointer"
+                                className="py-2 px-4 hover:bg-[#a8d603] rounded-lg cursor-pointer"
                             >
                                 {res.label}
                             </AutocompleteItem>
@@ -86,11 +88,11 @@ function Subscribe() {
                 </Autocomplete>
 
                 {/* Selected Tags */}
-                <div className="mt-4 flex flex-wrap gap-2">
+                <div className="mt-6 flex flex-wrap gap-3">
                     {selectedTags.map((tag, index) => (
                         <div
                             key={index}
-                            className="bg-[#4B2C46] text-white py-2 px-4 rounded-lg flex items-center gap-2"
+                            className="bg-[#2F2F2F] text-white py-2 px-4 rounded-lg flex items-center gap-2"
                         >
                             <span>{tag}</span>
                             <button
@@ -103,10 +105,10 @@ function Subscribe() {
                     ))}
                 </div>
 
-                {/*Subscribe button*/}
+                {/* Subscribe Button */}
                 {selectedTags?.length > 0 &&
-                    <div className="text-center mt-16">
-                        <a href="/subscribe" className="bg-[#4B2C46] bg-opacity-80  text-white py-3 px-6 rounded-lg text-xl font-semibold hover:bg-[#B77D9D] transition-all duration-300 transform hover:scale-105">
+                    <div className="text-center mt-12">
+                        <a href="/subscribe" className="bg-[#a8d603] text-black py-3 px-6 rounded-lg text-lg font-semibold hover:bg-[#94c102] transition-all duration-300 transform hover:scale-105">
                             Subscribe
                         </a>
                     </div>

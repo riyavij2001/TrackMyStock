@@ -7,48 +7,42 @@ function Stocks() {
   const [searchWord, setSearchWord] = useState("");
   const [selectedStock, setSelectedStock] = useState({});
   const [stockResult, setStockResult] = useState(null);
+
   const getSearchResults = () => {
     const config = {
       method: "get",
       url: `http://localhost:8181/api/v1/fetchStockData?term=${searchWord}`,
-      headers: {
-        // Authorization: `Bearer ${DecryptValue(localStorage.getItem('token'))}`,
-      },
+      headers: {},
     };
     axios(config)
       .then((res) => {
         setSearchResult(res.data);
       })
       .catch((err) => {
-        console.log(err)
+        console.log(err);
         setSearchResult([]);
-        setSelectedStock({})
-      })
-
+        setSelectedStock({});
+      });
   };
 
   const getStockDetails = () => {
     const config = {
       method: "get",
       url: `http://localhost:8181/api/v1/fetchStockDetails?stock_id=${selectedStock.id}`,
-      headers: {
-        // Authorization: `Bearer ${DecryptValue(localStorage.getItem('token'))}`,
-      },
+      headers: {},
     };
     axios(config)
       .then((res) => {
         setStockResult(res.data);
       })
       .catch((err) => {
-        console.log(err)
+        console.log(err);
         setStockResult(null);
-      })
-
+      });
   };
 
   useEffect(() => {
     if (selectedStock.id) {
-
       getStockDetails();
     }
   }, [selectedStock]);
@@ -60,50 +54,45 @@ function Stocks() {
     return () => clearTimeout(delayDebounceFn);
   }, [searchWord]);
 
-
-
   return (
-    <div className='min-h-screen py-16' id='stocks'>
+    <div className="min-h-screen py-16 text-gray-300" id="stocks">
       {/* Search Stocks Heading */}
-      <div className="text-center text-4xl font-bold text-white">
+      <div className="text-center text-4xl font-bold text-[#a8d603]">
         Search Stocks
       </div>
 
       {/* About Text Block */}
-      <div className="mt-8 px-6 text-xl text-gray-200 text-center max-w-4xl mx-auto">
-        Welcome to <span className="text-[#DC9EBF] font-bold">Track My Stocks</span> – your personalized,
+      <div className="mt-8 px-6 text-lg text-gray-400 text-center max-w-4xl mx-auto">
+        Welcome to <span className="text-[#a8d603] font-bold">Track My Stocks</span> – your personalized,
         real-time stock tracker designed to keep you informed and ahead of the curve. Whether you're a
         seasoned investor, just starting your journey, or simply tracking your favorite companies,
         we're here to make stock tracking easier, smarter, and more accessible.
       </div>
+
       {/* Stock Info Box */}
-      <div className="mx-auto w-[35rem] bg-[#4B2C46] p-8 rounded-xl shadow-lg text-white relative mt-16">
-        <div className='text-center'> {/* Removed w-[35rem] and mt-20 */}
+      <div className="mx-auto w-full sm:w-[35rem] bg-[#2F2F2F] p-8 rounded-xl shadow-lg text-white relative mt-16">
+        <div className="text-center">
           <Autocomplete
             value={searchWord}
             onValueChange={setSearchWord}
             onSelectionChange={(key) => {
-              console.log("Key to search: ", key);
-              let result = searchResult.find((option) => option.id === key)
-              setSelectedStock(result || {})
-              console.log("Selected Result: ", result);
+              let result = searchResult.find((option) => option.id === key);
+              setSelectedStock(result || {});
             }}
-            className="text-white py-3 px-6 rounded-lg text-xl font-semibold focus:outline-none focus:ring-2 focus:ring-[#DC9EBF] transition-all duration-300 w-full bg-transparent" // Removed background and set width to 100%
+            className="text-white py-3 px-6 rounded-lg text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-[#a8d603] transition-all duration-300 w-full bg-transparent"
             label="Search for a Stock"
           >
             {searchResult.map((res, i) => (
-              <AutocompleteItem key={res.id} className="bg-[#484848] text-white hover:bg-[#585858] py-2 px-4">
+              <AutocompleteItem key={res.id} className="bg-[#3A3A3A] text-white hover:bg-[#4A4A4A] py-2 px-4">
                 {res.label}
               </AutocompleteItem>
             ))}
           </Autocomplete>
         </div>
 
-        {/* ... (loading and error handling remain the same) */}
-
         {stockResult ? (
           <div className="mt-8">
-            <div className="text-3xl font-semibold mb-4 text-[#DC9EBF]">{stockResult?.name}</div>
+            <div className="text-3xl font-semibold mb-4 text-[#a8d603]">{stockResult?.name}</div>
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <div className="text-xl font-medium">Closing Price</div>
@@ -111,9 +100,7 @@ function Stocks() {
               </div>
               <div>
                 <div className="text-xl font-medium">Change</div>
-                <div className={`text-lg`}>
-                  {stockResult?.change}
-                </div>
+                <div className="text-lg">{stockResult?.change}</div>
               </div>
               <div>
                 <div className="text-xl font-medium">Sector</div>
@@ -137,13 +124,13 @@ function Stocks() {
             </div>
           </div>
         ) : (
-          <div className="text-xl text-center text-gray-300 mt-8">
+          <div className="text-lg text-center text-gray-400 mt-8">
             Select a stock to see the information
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }
 
 export default Stocks;
