@@ -19,7 +19,7 @@ func NewStore(db *sql.DB) *Store {
 // GetStockDetailsAllDates retrieves all stock details for a given stock identifier (stock_id).
 func (s *Store) GetStockDetailsAllDates(stockID int) ([]types.StockDetails, error) {
 	// Query to select all stock details for the given stock_id
-	query := `SELECT id, date, close, altman_z_score, f_score, sloan_ratio, stock_id 
+	query := `SELECT id, date, close, altman_z_score, f_score, sloan_ratio, stock_id
               FROM stock_details WHERE stock_id = ? ORDER BY date DESC LIMIT 2`
 
 	rows, err := s.db.Query(query, stockID)
@@ -51,7 +51,7 @@ func (s *Store) GetStockDetailsAllDates(stockID int) ([]types.StockDetails, erro
 // AddStockDetails inserts a new stock detail record into the database.
 func (s *Store) AddStockDetails(stockDetail types.StockDetails) error {
 	// Query to insert the stock details into the stock_details table
-	query := `INSERT INTO stock_details (date, close, altman_z_score, f_score, sloan_ratio, stock_id) 
+	query := `INSERT INTO stock_details (date, close, altman_z_score, f_score, sloan_ratio, stock_id)
               VALUES (?, ?, ?, ?, ?, ?)`
 
 	_, err := s.db.Exec(query,
@@ -66,6 +66,7 @@ func (s *Store) AddStockDetails(stockDetail types.StockDetails) error {
 		utils.LogMessage(utils.ERROR, "Error adding stock details:", err)
 		return err
 	}
+	utils.LogMessage(utils.INFO, "Stock details added successfully: ", stockDetail.ID)
 	return nil
 }
 

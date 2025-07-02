@@ -4,9 +4,3 @@ CREATE TABLE IF NOT EXISTS reference (
 	`value` INT DEFAULT NULL,
 	PRIMARY KEY (`id`)
 );
-
--- Insert default notification frequency options
-INSERT INTO reference (display_val, value) VALUES 
-('Daily', 1),
-('Weekly', 7),
-('Monthly', 30);

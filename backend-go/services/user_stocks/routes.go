@@ -31,6 +31,7 @@ func (h *UserStocksHandler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/getStock", auth.WithJWTAuth(h.getUserStocks, h.userStore)).Methods("GET")
 	router.HandleFunc("/getCategorizedStocks", auth.WithJWTAuth(h.getCategorizedStocksHandler, h.userStore)).Methods("POST")
 	router.HandleFunc("/setNextNotification", auth.WithJWTAuth(h.setNextNotification, h.userStore)).Methods("POST")
+	router.HandleFunc("/subscribe", auth.WithJWTAuth(h.subscribe, h.userStore)).Methods("POST")
 }
 
 func (h *UserStocksHandler) getUserStocks(w http.ResponseWriter, r *http.Request) {
@@ -92,98 +93,16 @@ func (h *UserStocksHandler) addUserStock(w http.ResponseWriter, r *http.Request)
 
 		// If stock doesn't exist, scrape data
 		if stock == nil {
-			// Colly collector
-			c := colly.NewCollector()
-
-			// Variables to store scraped data
-			var sector, code string
-			var close, altman, fScore, sloanRatio float64
-
-			// Scrape Birds Eye View
-			c.OnHTML("tr", func(e *colly.HTMLElement) {
-				// Get the cells in each row
-				cells := e.ChildTexts("td")
-				utils.LogMessage(utils.INFO, "Cells - Birds:", cells)
-
-				if len(cells) == 2 {
-					label := strings.TrimSpace(cells[0])
-					value := strings.TrimSpace(cells[1])
-
-					// Extract sector, close, and code
-					if strings.HasPrefix(label, "Sect") {
-						sector = value
-					} else if strings.HasPrefix(label, "Close") {
-						close, _ = strconv.ParseFloat(value, 64)
-					} else if strings.HasPrefix(label, "Code") {
-						code = value
-					}
-				}
-			})
-
-			// Scrape Fundamentals
-			c.OnHTML("tr", func(e *colly.HTMLElement) {
-				// Get the cells in each row
-				cells := e.ChildTexts("td")
-				utils.LogMessage(utils.INFO, "Cells - Funda:", cells)
-
-				if len(cells) == 2 {
-					label := strings.TrimSpace(cells[0])
-					value := strings.TrimSpace(cells[1])
-
-					// Extract altman, f_score, and sloan ratio
-					if strings.HasPrefix(label, "Altman") {
-						altman, _ = strconv.ParseFloat(value, 64)
-					} else if strings.HasPrefix(label, "Piotroski") {
-						fScore, _ = strconv.ParseFloat(value, 64)
-					} else if strings.HasPrefix(label, "Sloan") {
-						sloanRatio, _ = strconv.ParseFloat(value, 64)
-					}
-				}
-			})
-
-			// Start the scraping process for both pages
-			err := c.Visit("https://www.topstockresearch.com/rt/Stock/" + a + "/BirdsEyeView")
+			stock, err := h.scrapeAndStoreStock(a)
 			if err != nil {
-				utils.LogMessage(utils.ERROR, "Error visiting BirdsEyeView page for", a, ":", err.Error())
+				utils.LogMessage(utils.ERROR, "Error scraping stock:", err)
 				continue
 			}
-
-			// Scrape fundamentals page
-			err = c.Visit("https://www.topstockresearch.com/rt/Stock/" + a + "/FundamentalAnalysis")
-			if err != nil {
-				utils.LogMessage(utils.ERROR, "Error visiting Fundamental Analysis page for", a, ":", err.Error())
-			}
-
-			utils.LogMessage(utils.ERROR, "arg:", a, "code:", code, "sector", sector, "altman:", altman, "sloan", sloanRatio, "fscore:", fScore)
-
-			// Store the stock and stock details
-			err = h.stockStore.AddStock(types.Stocks{Arg: a, Code: code, Sector: sector, PE_Ratio: 0.0})
-			if err != nil {
-				utils.LogMessage(utils.ERROR, "Error adding stock to DB:", err)
-				continue
-			}
-			// Retrieve the stock after insertion
-			stock, _ = h.stockStore.GetStockByArg(a)
-
 			err = h.store.AddUserStock(userId, []int{stock.ID})
 
 			if err != nil {
 				utils.LogMessage(utils.ERROR, "Error mapping stock to user:", err)
 				return
-			}
-
-			// Add stock details (make sure you have the correct date and other values)
-			err = h.stockdetailStore.AddStockDetails(types.StockDetails{
-				StockID:      stock.ID,
-				Close:        close,
-				Date:         time.Now(),
-				AltmanZScore: altman,
-				FScore:       int(fScore),
-				SloanRatio:   sloanRatio * 100,
-			})
-			if err != nil {
-				utils.LogMessage(utils.ERROR, "Error adding stock details:", err.Error())
-				continue
 			}
 
 			utils.LogMessage(utils.INFO, "Successfully added stock details for:", a)
@@ -221,38 +140,26 @@ func (h *UserStocksHandler) getCategorizedStocksHandler(w http.ResponseWriter, r
 
 }
 
-func (h *UserStocksHandler) sendSubMail(w http.ResponseWriter, r *http.Request) {
-	userId := auth.GetUserIDFromContext(r.Context())
-
-	var requestBody struct {
-		Args []string `json:"args"`
-	}
-
-	if err := utils.ParseJSON(r, &requestBody); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
-		return
-	}
-
+func (h *UserStocksHandler) sendSubMail(userId int, args []string) {
+	fmt.Printf("UserId: %d, Args: %v\n", userId, args)
 	userDetails, err := h.userStore.GetUserById(userId)
 
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+		fmt.Errorf("Could not find the user: ", err)
 		return
 	}
 
-	stocksList, err := h.getCategorizedStocks(requestBody.Args)
+	stocksList, err := h.getCategorizedStocks(args)
+	// utils.LogMessage(utils.INFO, "Stocks List:", stocksList)
 
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+		fmt.Errorf("Could not find the user: ", err)
 		return
 	}
 
 	htmlContent, _ := utils.RenderTemplate(stocksList, userDetails.FirstName)
 
 	h.store.SendSubMail(htmlContent, userDetails.FirstName, userDetails.Email)
-
-	utils.WriteJSON(w, http.StatusCreated, stocksList)
-
 }
 
 func (h *UserStocksHandler) getCategorizedStocks(args []string) (types.SectorStocks, error) {
@@ -342,4 +249,164 @@ func (h *UserStocksHandler) setNextNotification(w http.ResponseWriter, r *http.R
 	}
 
 	utils.WriteJSON(w, http.StatusOK, map[string]string{"message": "Next notification date set successfully"})
+}
+
+func (h *UserStocksHandler) subscribe(w http.ResponseWriter, r *http.Request) {
+	userId := auth.GetUserIDFromContext(r.Context())
+
+	var requestBody struct {
+		StockIDs []string `json:"stock_ids"`
+	}
+
+	if err := utils.ParseJSON(r, &requestBody); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	// Validate that the stock belongs to the user
+	stocks, err := h.store.GetUserStocks(userId)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("could not find the user stocks: %v", err))
+		return
+	}
+
+	//If stock not present previously, add to user stocks
+	for _, stockID := range requestBody.StockIDs {
+		if !containsStock(stocks, stockID) {
+			savedStock, err := h.stockStore.GetStockByArg(stockID)
+			if err != nil || savedStock == nil {
+				utils.LogMessage(utils.INFO, "Could not find stock, scraping:", stockID)
+				savedStock, err = h.scrapeAndStoreStock(stockID)
+				if err != nil {
+					utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("failed to scrape and store stock: %v", err))
+					return
+				}
+				if savedStock == nil {
+					utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("failed to scrape and store stock: %v", err))
+					return
+				}
+			}
+			err = h.store.AddUserStock(userId, []int{savedStock.ID})
+			if err != nil {
+				utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("failed to add stock to user: %v", err))
+				return
+			}
+		}
+	}
+
+	stocks, err = h.store.GetUserStocks(userId)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("could not find the user stocks: %v", err))
+		return
+	}
+	//Send Mail to for all the stocks
+	h.sendSubMail(userId, getStockIDs(stocks))
+	utils.WriteJSON(w, http.StatusOK, map[string]string{"message": "User subscribed to stock successfully"})
+}
+
+func containsStock(stocks []types.Stocks, stockID string) bool {
+	for _, stock := range stocks {
+		if stock.Code == stockID {
+			return true
+		}
+	}
+	return false
+}
+
+func getStockIDs(stocks []types.Stocks) []string {
+	ids := make([]string, 0, len(stocks))
+	for _, stock := range stocks {
+		ids = append(ids, stock.Code)
+	}
+	return ids
+}
+
+func (h *UserStocksHandler) scrapeAndStoreStock(arg string) (stock *types.Stocks, err error) {
+	c := colly.NewCollector()
+
+	// Variables to store scraped data
+	var sector, code string
+	var close, altman, fScore, sloanRatio float64
+
+	// Scrape Birds Eye View
+	c.OnHTML("tr", func(e *colly.HTMLElement) {
+		// Get the cells in each row
+		cells := e.ChildTexts("td")
+		utils.LogMessage(utils.INFO, "Cells - Birds:", cells)
+
+		if len(cells) == 2 {
+			label := strings.TrimSpace(cells[0])
+			value := strings.TrimSpace(cells[1])
+
+			// Extract sector, close, and code
+			if strings.HasPrefix(label, "Sect") {
+				sector = value
+			} else if strings.HasPrefix(label, "Close") {
+				close, _ = strconv.ParseFloat(value, 64)
+			} else if strings.HasPrefix(label, "Code") {
+				code = value
+			}
+		}
+	})
+
+	// Scrape Fundamentals
+	c.OnHTML("tr", func(e *colly.HTMLElement) {
+		// Get the cells in each row
+		cells := e.ChildTexts("td")
+		utils.LogMessage(utils.INFO, "Cells - Funda:", cells)
+
+		if len(cells) == 2 {
+			label := strings.TrimSpace(cells[0])
+			value := strings.TrimSpace(cells[1])
+
+			// Extract altman, f_score, and sloan ratio
+			if strings.HasPrefix(label, "Altman") {
+				altman, _ = strconv.ParseFloat(value, 64)
+			} else if strings.HasPrefix(label, "Piotroski") {
+				fScore, _ = strconv.ParseFloat(value, 64)
+			} else if strings.HasPrefix(label, "Sloan") {
+				sloanRatio, _ = strconv.ParseFloat(value, 64)
+			}
+		}
+	})
+
+	// Start the scraping process for both pages
+	err = c.Visit("https://www.topstockresearch.com/rt/Stock/" + arg + "/BirdsEyeView")
+	if err != nil {
+		utils.LogMessage(utils.ERROR, "Error visiting BirdsEyeView page for", arg, ":", err.Error())
+		return nil, err
+	}
+
+	// Scrape fundamentals page
+	err = c.Visit("https://www.topstockresearch.com/rt/Stock/" + arg + "/FundamentalAnalysis")
+	if err != nil {
+		utils.LogMessage(utils.ERROR, "Error visiting Fundamental Analysis page for", arg, ":", err.Error())
+	}
+
+	utils.LogMessage(utils.INFO, "arg:", arg, "code:", code, "sector", sector, "altman:", altman, "sloan", sloanRatio, "fscore:", fScore)
+
+	// Store the stock and stock details
+	err = h.stockStore.AddStock(types.Stocks{Arg: arg, Code: code, Sector: sector, PE_Ratio: 0.0})
+	if err != nil {
+		utils.LogMessage(utils.ERROR, "Error adding stock to DB:", err)
+		return nil, err
+	}
+	// Retrieve the stock after insertion
+	stock, _ = h.stockStore.GetStockByArg(arg)
+
+	// Add stock details (make sure you have the correct date and other values)
+	err = h.stockdetailStore.AddStockDetails(types.StockDetails{
+		StockID:      stock.ID,
+		Close:        close,
+		Date:         time.Now(),
+		AltmanZScore: altman,
+		FScore:       int(fScore),
+		SloanRatio:   sloanRatio * 100,
+	})
+	if err != nil {
+		utils.LogMessage(utils.ERROR, "Error adding stock details:", err.Error())
+		return nil, err
+	}
+
+	return stock, nil
 }

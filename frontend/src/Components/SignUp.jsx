@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import { Input } from "@heroui/react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 function SignUp() {
   const firstNameRef = useRef(null);
@@ -12,6 +13,7 @@ function SignUp() {
   const [token, setToken] = useState("");
   const [error, setError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const navigate = useNavigate();
 
   const handleSignUp = () => {
     const firstName = firstNameRef.current?.value || "";
@@ -38,6 +40,7 @@ function SignUp() {
       .then((res) => {
         setToken(res.data.token);
         setError("");
+        navigate("/");
         console.log("Token received:", res.data.token);
       })
       .catch((err) => {
@@ -50,9 +53,14 @@ function SignUp() {
   };
 
   return (
-    <div id="signup" className="min-h-screen flex items-center justify-center text-gray-300">
+    <div
+      id="signup"
+      className="min-h-screen flex items-center justify-center text-gray-300"
+    >
       <div className="w-full max-w-md bg-[#2F2F2F] p-8 rounded-lg shadow-lg">
-        <h2 className="text-3xl font-bold text-center text-[#a8d603] mb-6">Sign Up</h2>
+        <h2 className="text-3xl font-bold text-center text-[#a8d603] mb-6">
+          Sign Up
+        </h2>
 
         {passwordError && (
           <p className="text-red-500 text-sm mb-2">{passwordError}</p>
@@ -62,7 +70,10 @@ function SignUp() {
 
         <form className="space-y-5">
           <div>
-            <label htmlFor="firstName" className="block text-sm font-medium mb-2">
+            <label
+              htmlFor="firstName"
+              className="block text-sm font-medium mb-2"
+            >
               First Name
             </label>
             <Input
@@ -75,7 +86,10 @@ function SignUp() {
             />
           </div>
           <div>
-            <label htmlFor="lastName" className="block text-sm font-medium mb-2">
+            <label
+              htmlFor="lastName"
+              className="block text-sm font-medium mb-2"
+            >
               Last Name
             </label>
             <Input
@@ -101,7 +115,10 @@ function SignUp() {
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium mb-2">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium mb-2"
+            >
               Password
             </label>
             <Input
@@ -114,7 +131,10 @@ function SignUp() {
             />
           </div>
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium mb-2">
+            <label
+              htmlFor="confirmPassword"
+              className="block text-sm font-medium mb-2"
+            >
               Confirm Password
             </label>
             <Input

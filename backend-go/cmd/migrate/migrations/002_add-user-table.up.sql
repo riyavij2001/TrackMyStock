@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS users (
   `password` VARCHAR(255) NOT NULL,
   `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `notification_frequency` INT DEFAULT NULL,
-  
+
   PRIMARY KEY (id),
   UNIQUE KEY (email),
   FOREIGN KEY (notification_frequency) REFERENCES reference(id)

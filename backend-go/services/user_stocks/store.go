@@ -106,6 +106,8 @@ func ScanRowIntoUserStocks(row *sql.Rows) (*types.UserStocks, error) {
 }
 
 func (s *Store) SendSubMail(htmlContent string, recipientName string, recipientEmail string) error {
+	fmt.Printf("Sending email to %s", recipientEmail)
+
 	fromEmail := config.Envs.EmailUsername
 	password := config.Envs.EmailPassword
 
@@ -120,9 +122,11 @@ func (s *Store) SendSubMail(htmlContent string, recipientName string, recipientE
 	// Send the email using SMTP
 	dialer := gomail.NewDialer(smtpServer, smtpPort, fromEmail, password)
 	if err := dialer.DialAndSend(message); err != nil {
+		utils.LogMessage(utils.ERROR, "Error sending email:", err)
 		return err
 	}
 
+	utils.LogMessage(utils.INFO, "Success:", "sent email to", recipientEmail)
 	return nil
 }
 
