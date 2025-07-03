@@ -101,7 +101,7 @@ func GetUserIDFromContext(ctx context.Context) int {
 	userID, ok := ctx.Value(UserKey).(int)
 	utils.LogMessage(utils.INFO, "userID: ", userID)
 	if !ok {
-		fmt.Errorf("could not find the user")
+		utils.LogMessage(utils.ERROR, "could not find the user")
 		return -1
 	}
 

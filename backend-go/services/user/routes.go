@@ -32,7 +32,7 @@ func (h *Handler) loginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("Recieved:", "Email:", user.Email, "Password:", user.Password)
+	utils.LogMessage(utils.INFO, "Recieved:", "Email:", user.Email)
 
 	if err := utils.Validate.Struct(user); err != nil {
 		errors := err.(validator.ValidationErrors)

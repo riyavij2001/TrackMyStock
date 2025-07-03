@@ -19,10 +19,11 @@ type UserStocksHandler struct {
 	stockStore       types.StocksStore
 	stockdetailStore types.StockDetailsStore
 	userStore        types.UserStore
+	referenceStore   types.ReferenceStore
 }
 
-func NewHandler(store types.UserStocksStore, stockStore types.StocksStore, stockdetailStore types.StockDetailsStore, userStore types.UserStore) *UserStocksHandler {
-	return &UserStocksHandler{store: store, stockStore: stockStore, stockdetailStore: stockdetailStore, userStore: userStore}
+func NewHandler(store types.UserStocksStore, stockStore types.StocksStore, stockdetailStore types.StockDetailsStore, userStore types.UserStore, referenceStore types.ReferenceStore) *UserStocksHandler {
+	return &UserStocksHandler{store: store, stockStore: stockStore, stockdetailStore: stockdetailStore, userStore: userStore, referenceStore: referenceStore}
 }
 
 func (h *UserStocksHandler) RegisterRoutes(router *mux.Router) {
@@ -162,7 +163,7 @@ func (h *UserStocksHandler) getCategorizedStocksHandler(w http.ResponseWriter, r
 }
 
 func (h *UserStocksHandler) sendSubMail(userId int, args []string) {
-	fmt.Printf("UserId: %d, Args: %v\n", userId, args)
+	utils.LogMessage(utils.INFO, "UserId:", userId, "Args:", args)
 	userDetails, err := h.userStore.GetUserById(userId)
 
 	if err != nil {
@@ -179,7 +180,19 @@ func (h *UserStocksHandler) sendSubMail(userId int, args []string) {
 	}
 
 	htmlContent, _ := utils.RenderTemplate(stocksList, userDetails.FirstName)
-
+	if userDetails.NotificationFrequency != 0 {
+		reference, err := h.referenceStore.GetReferenceByID(userDetails.NotificationFrequency)
+		if err != nil {
+			fmt.Errorf("Could not find the reference: ", err)
+			return
+		}
+		now := time.Now()
+		err = h.store.SetNextNotification(userId, now.AddDate(0, 0, reference.Value))
+		if err != nil {
+			fmt.Errorf("Could not set next notification: ", err)
+		}
+		utils.LogMessage(utils.INFO, "User's next notification set")
+	}
 	h.store.SendSubMail(htmlContent, userDetails.FirstName, userDetails.Email)
 }
 
@@ -263,7 +276,7 @@ func (h *UserStocksHandler) setNextNotification(w http.ResponseWriter, r *http.R
 	}
 
 	// Update the next notification date
-	err = h.store.SetNextNotification(userId, requestBody.StockID, requestBody.NextNotification)
+	err = h.store.SetNextNotification(userId, requestBody.NextNotification)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("failed to set next notification: %v", err))
 		return

@@ -116,7 +116,7 @@ func ScanRowIntoUserStocks(row *sql.Rows) (*types.UserStocks, error) {
 }
 
 func (s *Store) SendSubMail(htmlContent string, recipientName string, recipientEmail string) error {
-	fmt.Printf("Sending email to %s", recipientEmail)
+	utils.LogMessage(utils.INFO, "Sending email to:", recipientEmail)
 
 	fromEmail := config.Envs.EmailUsername
 	password := config.Envs.EmailPassword
@@ -140,10 +140,10 @@ func (s *Store) SendSubMail(htmlContent string, recipientName string, recipientE
 	return nil
 }
 
-func (s *Store) SetNextNotification(userID int, stockID int, nextNotification time.Time) error {
-	query := `UPDATE user_stocks SET next_notification = ? WHERE user_id = ? AND stock_id = ?`
+func (s *Store) SetNextNotification(userID int, nextNotification time.Time) error {
+	query := `UPDATE user_stocks SET next_notification = ? WHERE user_id = ?`
 
-	result, err := s.db.Exec(query, nextNotification, userID, stockID)
+	result, err := s.db.Exec(query, nextNotification, userID)
 	if err != nil {
 		utils.LogMessage(utils.ERROR, "Error updating next notification:", err)
 		return err

@@ -59,7 +59,7 @@ func (s *APIServer) Run() error {
 	userHandler := user.NewHandler(userStore)
 	userHandler.RegisterRoutes(subRouter)
 
-	userStocksHandler := userstocks.NewHandler(userStocksStore, stockStore, stockDetailsStore, userStore)
+	userStocksHandler := userstocks.NewHandler(userStocksStore, stockStore, stockDetailsStore, userStore, referenceStore)
 	userStocksHandler.RegisterRoutes(subRouter)
 
 	stocksHandler := stocks.NewHandler(stockStore)

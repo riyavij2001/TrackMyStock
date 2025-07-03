@@ -14,7 +14,7 @@ type UserStocksStore interface {
 	AddUserStock(userID int, stockIDs []int) error
 	RemoveUserStock(int, []int) error
 	SendSubMail(htmlContent string, recipientName string, recipientEmail string) error
-	SetNextNotification(userID int, stockID int, nextNotification time.Time) error
+	SetNextNotification(userID int, nextNotification time.Time) error
 }
 
 type UserStockDataPayload struct {
