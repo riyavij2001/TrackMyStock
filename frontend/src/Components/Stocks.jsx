@@ -9,6 +9,10 @@ function Stocks() {
   const [stockResult, setStockResult] = useState(null);
 
   const getSearchResults = () => {
+    if (searchWord.trim() === "") {
+      setSearchResult([]);
+      return;
+    }
     const config = {
       method: "get",
       url: `http://localhost:8181/api/v1/fetchStockData?term=${searchWord}`,
@@ -63,10 +67,12 @@ function Stocks() {
 
       {/* About Text Block */}
       <div className="mt-8 px-6 text-lg text-gray-400 text-center max-w-4xl mx-auto">
-        Welcome to <span className="text-[#a8d603] font-bold">Track My Stocks</span> – your personalized,
-        real-time stock tracker designed to keep you informed and ahead of the curve. Whether you're a
-        seasoned investor, just starting your journey, or simply tracking your favorite companies,
-        we're here to make stock tracking easier, smarter, and more accessible.
+        Welcome to{" "}
+        <span className="text-[#a8d603] font-bold">Track My Stocks</span> – your
+        personalized, real-time stock tracker designed to keep you informed and
+        ahead of the curve. Whether you're a seasoned investor, just starting
+        your journey, or simply tracking your favorite companies, we're here to
+        make stock tracking easier, smarter, and more accessible.
       </div>
 
       {/* Stock Info Box */}
@@ -83,7 +89,10 @@ function Stocks() {
             label="Search for a Stock"
           >
             {searchResult.map((res, i) => (
-              <AutocompleteItem key={res.id} className="bg-[#3A3A3A] text-white hover:bg-[#4A4A4A] py-2 px-4">
+              <AutocompleteItem
+                key={res.id}
+                className="bg-[#3A3A3A] text-white hover:bg-[#4A4A4A] py-2 px-4"
+              >
                 {res.label}
               </AutocompleteItem>
             ))}
@@ -92,7 +101,9 @@ function Stocks() {
 
         {stockResult ? (
           <div className="mt-8">
-            <div className="text-3xl font-semibold mb-4 text-[#a8d603]">{stockResult?.name}</div>
+            <div className="text-3xl font-semibold mb-4 text-[#a8d603]">
+              {stockResult?.name}
+            </div>
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <div className="text-xl font-medium">Closing Price</div>
