@@ -81,7 +81,17 @@ func (s *Store) AddUserStock(userID int, stockIDs []int) error {
 	return nil
 }
 
-func (s *Store) RemoveUserStock(int, int) error { return nil }
+func (s *Store) RemoveUserStock(userId int, stockIds []int) error {
+	for _, stockID := range stockIds {
+		query := `DELETE FROM user_stocks WHERE user_id = ? AND stock_id = ?`
+		_, err := s.db.Exec(query, userId, stockID)
+		if err != nil {
+			utils.LogMessage(utils.ERROR, "Error removing stock for user:", err)
+			return err // Exit immediately on error
+		}
+	}
+	return nil
+}
 
 func ScanRowIntoUserStocks(row *sql.Rows) (*types.UserStocks, error) {
 	stock := new(types.UserStocks)

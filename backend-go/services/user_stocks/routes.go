@@ -114,8 +114,29 @@ func (h *UserStocksHandler) addUserStock(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *UserStocksHandler) removeUserStock(w http.ResponseWriter, r *http.Request) {
+	// Flow:
+	// 1: Get user ID from request
+	// 2: Get stock ID from request
+	// 3: Remove stock from user's stocks
+	// 4: Write JSON response
+	userId := auth.GetUserIDFromContext(r.Context())
 
-	utils.WriteJSON(w, http.StatusCreated, map[string]string{"message": "User Created"})
+	var requestBody struct {
+		Ids []int `json:"ids"`
+	}
+
+	if err := utils.ParseJSON(r, &requestBody); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	err := h.store.RemoveUserStock(userId, requestBody.Ids)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusCreated, map[string]string{"message": "User Stocks Removed"})
 
 }
 
@@ -300,7 +321,7 @@ func (h *UserStocksHandler) subscribe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//Send Mail to for all the stocks
-	h.sendSubMail(userId, getStockIDs(stocks))
+	go h.sendSubMail(userId, getStockIDs(stocks))
 	utils.WriteJSON(w, http.StatusOK, map[string]string{"message": "User subscribed to stock successfully"})
 }
 

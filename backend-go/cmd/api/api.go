@@ -74,6 +74,7 @@ func (s *APIServer) Run() error {
 		AllowedOrigins:   []string{"http://localhost:5173"},
 		AllowCredentials: true,
 		AllowedHeaders:   []string{"Authorization", "Content-Type"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		// Enable Debugging for testing, consider disabling in production
 		Debug: true,
 	})

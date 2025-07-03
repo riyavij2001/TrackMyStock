@@ -6,11 +6,13 @@ function Subscribe() {
   const [searchResult, setSearchResult] = useState([]);
   const [searchWord, setSearchWord] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
 
   const resetPage = () => {
     setSearchWord("");
     setSearchResult([]);
     setSelectedTags([]);
+    getUserStocks();
   };
 
   const getSearchResults = () => {
@@ -34,6 +36,32 @@ function Subscribe() {
       });
   };
 
+  const getUserStocks = () => {
+    const config = {
+      method: "get",
+      url: `http://localhost:8181/api/v1/getStock`,
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    };
+
+    axios(config)
+      .then((res) => {
+        const userStocks = res.data?.stocks || [];
+        setSelectedTags(
+          userStocks.map((stock) => ({
+            id: stock.code,
+            label: stock.code,
+            isUserStock: true,
+            stockId: stock.id,
+          })),
+        );
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
+
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       getSearchResults();
@@ -48,7 +76,31 @@ function Subscribe() {
   };
 
   const handleTagRemoval = (indexToRemove) => {
-    setSelectedTags(selectedTags.filter((_, index) => index !== indexToRemove));
+    const tagToRemove = selectedTags[indexToRemove];
+    if (tagToRemove.stockId) {
+      axios
+        .delete(`http://localhost:8181/api/v1/removeStock`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          data: {
+            ids: [tagToRemove.stockId],
+          },
+          withCredentials: true,
+        })
+        .then(() => {
+          setSelectedTags(
+            selectedTags.filter((_, index) => index !== indexToRemove),
+          );
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    } else {
+      setSelectedTags(
+        selectedTags.filter((_, index) => index !== indexToRemove),
+      );
+    }
   };
 
   const handleSubscibe = () => {
@@ -64,13 +116,21 @@ function Subscribe() {
     };
 
     axios(config)
-      .then((res) => {
+      .then(() => {
         resetPage();
       })
       .catch((err) => {
         console.error(err);
       });
   };
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      setIsUserLoggedIn(true);
+      getUserStocks();
+    }
+  }, []);
 
   return (
     <div className="py-16 text-gray-300 min-h-screen" id="subscribe">
@@ -121,6 +181,7 @@ function Subscribe() {
               className="bg-[#2F2F2F] text-white py-2 px-4 rounded-lg flex items-center gap-2"
             >
               <span>{tag.id}</span>
+              {tag.isUserStock ? <span>{"(Subscribed)"}</span> : null}
               <button
                 onClick={() => handleTagRemoval(index)}
                 className="text-red-500 hover:text-red-700"
