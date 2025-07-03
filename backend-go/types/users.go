@@ -6,6 +6,7 @@ type UserStore interface {
 	GetUserByEmail(enmail string) (*User, error)
 	GetUserById(id int) (*User, error)
 	CreateUser(User) error
+	UpdateFrequency(id int, frequency int) error
 }
 
 type User struct {

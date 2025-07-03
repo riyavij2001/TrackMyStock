@@ -23,6 +23,7 @@ func NewHandler(store types.UserStore) *Handler {
 func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/login", h.loginUser).Methods("POST")
 	router.HandleFunc("/register", h.registerUser).Methods("POST")
+	router.HandleFunc("/updateFrequency", auth.WithJWTAuth(h.updateFrequency, h.store)).Methods("POST")
 }
 
 func (h *Handler) loginUser(w http.ResponseWriter, r *http.Request) {
@@ -106,4 +107,24 @@ func (h *Handler) registerUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJSON(w, http.StatusCreated, map[string]string{"message": "User Created"})
+}
+
+func (h *Handler) updateFrequency(w http.ResponseWriter, r *http.Request) {
+	userId := auth.GetUserIDFromContext(r.Context())
+	utils.LogMessage(utils.INFO, fmt.Sprintf("Updating frequency for user %d", userId))
+	var requestBody struct {
+		Id int `json:"id"`
+	}
+	if err := utils.ParseJSON(r, &requestBody); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+	err := h.store.UpdateFrequency(userId, requestBody.Id)
+
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, map[string]string{"message": "Frequency Updated"})
 }

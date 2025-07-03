@@ -100,3 +100,12 @@ func (s *Store) CreateUser(user types.User) error {
 
 	return nil
 }
+
+func (s *Store) UpdateFrequency(id int, frequency int) error {
+	_, err := s.db.Exec("UPDATE users SET notification_frequency = ? WHERE id = ?", frequency, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
